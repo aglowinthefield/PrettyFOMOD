@@ -33,22 +33,22 @@ namespace PrettyFOMOD
                 RemoveTestDocument(fomodPath);
             }
             
-            var doc = OpenFomodFile(fomodPath);
+            var moduleConfiguration = OpenFomodFile(fomodPath);
 
-            var cache = FomodXmlUtils.GenerateFomodDestinationESPCache(doc);
+            var cache = FomodXmlUtils.GenerateFomodDestinationESPCache(moduleConfiguration);
             
-            var pluginNodes = FomodXmlUtils.GetPluginNodes(doc);
+            var pluginNodes = FomodXmlUtils.GetPluginNodes(moduleConfiguration);
             foreach (var pluginNode in pluginNodes)
             {
-                ProcessPlugin(pluginNode, fomodPath);
+                ProcessPlugin(pluginNode, fomodPath, cache);
             }
 
             // serialize back to doc
             BackupModuleConfig(fomodPath);
-            SaveFomod(doc, fomodPath, config);
+            SaveFomod(moduleConfiguration, fomodPath, config);
         }
         
-        private static void ProcessPlugin(Plugin plugin, string fomodPath)
+        private static void ProcessPlugin(Plugin plugin, string fomodPath, HashSet<string> destinationCache)
         {
             var pluginName = plugin.Name;
             Console.WriteLine("Processing plugin " + pluginName);
@@ -65,7 +65,7 @@ namespace PrettyFOMOD
             foreach (var fileList in fileNodes)
             {
                 if (!fileList.FileSpecified) return;
-                espPaths.AddRange(fileList.File.Select(fileSystemItem => fileSystemItem.Source));
+                espPaths.AddRange(fileList.File.Select(fileSystemItem => fileSystemItem.Source).Where(IsPluginFileName));
             }
 
             List<string> masters = [];
@@ -90,12 +90,15 @@ namespace PrettyFOMOD
                  we want to remove the <type /> element and replace with our generated condition node.
              */
             var typeDescriptorNode = FomodXmlUtils.ResetTypeDescriptorForPluginNode(plugin);
-            var conditionNode = GenerateRecommendedConditionNodeForMasters(masters);
+            var conditionNode = GenerateRecommendedConditionNodeForMasters(masters, destinationCache);
             Console.WriteLine("Adding recommendations to XML");
             typeDescriptorNode.DependencyType = conditionNode;
         }
 
-        private static DependencyPluginType GenerateRecommendedConditionNodeForMasters(List<string> masters)
+        private static DependencyPluginType GenerateRecommendedConditionNodeForMasters(
+            List<string> masters,
+            HashSet<string> destinationCache
+            )
         {
             /* Create a node within `plugin.typeDescriptor` marking something as Recommended if masters are present
              Example here:
@@ -126,11 +129,16 @@ namespace PrettyFOMOD
 
             foreach (var master in masters)
             {
+                if (destinationCache.Contains(master))
+                {
+                    continue;
+                }
+                
                 var fileDependency = new FileDependency() { File = master, State = FileDependencyState.Active };
                 compositeDependency.FileDependency.Add(fileDependency);
             }
             
-            // create pattern
+            // create pattern. this stuff is all kinda hard to memorize and follow. maybe refactor some of the nonsense out
             var pattern = new DependencyPattern()
             {
                 Dependencies = compositeDependency,
@@ -142,6 +150,7 @@ namespace PrettyFOMOD
                 Patterns = { pattern },
                 DefaultType = new PluginType() { Name = PluginTypeEnum.Optional }
             };
+            
             return dependencyPluginType;
         }
 
@@ -189,14 +198,11 @@ namespace PrettyFOMOD
         {
             var doc = new XmlDocument();
             doc.Load(Path.Combine(fomodDirectoryPath, "ModuleConfig.xml"));
-            
-            ModuleConfiguration configuration = null!;
+
             var serializer = new XmlSerializer(typeof(ModuleConfiguration));
 
             using XmlReader reader = new XmlNodeReader(doc);
-            configuration = (ModuleConfiguration)serializer.Deserialize(reader)!;
-
-            return configuration;
+            return (ModuleConfiguration)serializer.Deserialize(reader)!;
         }
         
         private static void BackupModuleConfig(string fomodPath)
@@ -236,8 +242,7 @@ namespace PrettyFOMOD
             {
                 serializer.Serialize(writer, moduleConfiguration);
             }
-
-            // document.Save(filePath);
+            
             Console.WriteLine($"FOMOD saved to {filePath}");
         }
         
