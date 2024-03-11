@@ -611,7 +611,7 @@ namespace PrettyFOMOD
             {
                 return _patterns;
             }
-            private set
+            set
             {
                 _patterns = value;
             }

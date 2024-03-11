@@ -1,54 +1,38 @@
-﻿using System.Xml;
+﻿using System.Collections.ObjectModel;
+using System.Xml;
 
 namespace PrettyFOMOD;
 
 public static class FomodXmlUtils
 {
-    public static XmlNode ResetTypeDescriptorForPluginNode(XmlNode pluginNode)
+    public static PluginTypeDescriptor ResetTypeDescriptorForPluginNode(Plugin pluginNode)
     {
-            var ownerDoc = pluginNode.OwnerDocument!;
-            var typeDescriptorNode = pluginNode.SelectSingleNode(Constants.ElementNames.TypeDescriptor);
-            
-            if (typeDescriptorNode == null)
+        Console.WriteLine("Removing existing type descriptor node.");
+        
+        pluginNode.TypeDescriptor = new PluginTypeDescriptor
+        {
+            DependencyType = new DependencyPluginType()
             {
-                typeDescriptorNode = ownerDoc.CreateElement(Constants.ElementNames.TypeDescriptor);
-                pluginNode.AppendChild(typeDescriptorNode);
+                Patterns = [],
+                DefaultType = new PluginType() { Name = PluginTypeEnum.Optional }
             }
-            
-            Console.WriteLine("Removing existing type descriptor node.");
-            typeDescriptorNode.RemoveAll(); // Clear contents of existing <typeDescriptor />
-            Console.WriteLine("Generating conditions from listed ESP masters.");
-            return typeDescriptorNode;
+        };
+        return pluginNode.TypeDescriptor;
     }
 
-    public static List<XmlNode> GetPluginNodes(XmlDocument document)
+    public static List<Plugin> GetPluginNodes(ModuleConfiguration configuration)
     {
-        List<XmlNode> pluginNodes = [];
-        // find "config" childnode and return its child nodes
-        if (document.DocumentElement == null) throw new Exception("Malformed XML");
-        var installSteps = document.DocumentElement.SelectSingleNode("/config/installSteps")?.ChildNodes;
+        List<Plugin> plugins = [];
 
-        if (installSteps == null)
+        foreach (var installStep in configuration.InstallSteps.InstallStep)
         {
-            throw new Exception("Malformed XML");
-        }
-        
-        // TODO: This is like CS101 style iteration, clean this up later.
-        // I'm no expert at LINQ expressions, so Rider's conversion offer is tempting but I'll pass for now.
-        foreach (XmlNode installStep in installSteps)
-        {
-            var groups = installStep.ChildNodes[0]!.ChildNodes;
-            foreach (XmlNode group in groups)
+            foreach (var group in installStep.OptionalFileGroups.Group)
             {
-                var plugins = group.ChildNodes[0];
-                foreach (XmlNode plugin in plugins!)
-                {
-                    pluginNodes.Add(plugin);
-                }
+                plugins.AddRange(group.Plugins.Plugin);
             }
         }
 
-        return pluginNodes;
+        return plugins;
     }
 
     /*
@@ -57,16 +41,32 @@ public static class FomodXmlUtils
      * if we have a FOMOD that install a 'base' mod, then patches for that base mod, we don't want to include the
      * base mod in the fileDependency list because the user won't have installed it yet!
      */
-    public static HashSet<string> GenerateFomodSourceESPCache(XmlDocument document)
+    public static HashSet<string> GenerateFomodDestinationESPCache(ModuleConfiguration configuration)
     {
         var cache = new HashSet<string>();
-
-        var pluginNodes = GetPluginNodes(document);
-        foreach (var pluginNode in pluginNodes)
+        
+        foreach (var installStep in configuration.InstallSteps.InstallStep)
         {
-            // pluginNode.
+            foreach (var group in installStep.OptionalFileGroups.Group)
+            {
+                foreach (var plugin in group.Plugins.Plugin)
+                {
+                    if (!plugin.FilesSpecified) continue;
+                    foreach (var pluginFile in plugin.Files)
+                    {
+                        foreach (var fileSystemItem in pluginFile.File)
+                        {
+                            cache.Add(GetEspFilenameFromPath(fileSystemItem.Destination));
+                        }
+                    }
+                }
+            }
         }
-
         return cache;
+    }
+
+    private static string GetEspFilenameFromPath(string path)
+    {
+        return path.Split("\\").Last();
     }
 }

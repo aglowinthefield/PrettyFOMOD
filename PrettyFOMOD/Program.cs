@@ -1,4 +1,5 @@
 ﻿using System.Xml;
+using System.Xml.Serialization;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
 
@@ -24,7 +25,7 @@ namespace PrettyFOMOD
         {
             // For ease of testing in an IDE, I nest resources in the CWD/test folder. Set your run arg to -test if debugging 
             var fomodPath = config.Test
-                ? Path.Combine(GetCwdPath()!, "test\\ff\\fomod")
+                ? Path.Combine(GetCwdPath()!, @"test\ff\fomod")
                 : Path.Combine(GetCwdPath()!, "fomod");
 
             if (config.Test)
@@ -34,55 +35,51 @@ namespace PrettyFOMOD
             
             var doc = OpenFomodFile(fomodPath);
 
+            var cache = FomodXmlUtils.GenerateFomodDestinationESPCache(doc);
+            
             var pluginNodes = FomodXmlUtils.GetPluginNodes(doc);
             foreach (var pluginNode in pluginNodes)
             {
                 ProcessPlugin(pluginNode, fomodPath);
             }
 
-            BackupModuleConfig(doc, fomodPath);
+            // serialize back to doc
+            BackupModuleConfig(fomodPath);
             SaveFomod(doc, fomodPath, config);
             
         }
         
-        private static void ProcessPlugin(XmlNode plugin, string fomodPath)
+        private static void ProcessPlugin(Plugin plugin, string fomodPath)
         {
-            var pluginName = plugin.Attributes!["name"]!.Value;
+            var pluginName = plugin.Name;
             Console.WriteLine("Processing plugin " + pluginName);
-            // TODO: collect multiple source paths. Could have multiple files in here.
-            var fileNode = plugin.SelectSingleNode("files/file");
-            if (fileNode == null)
+
+            var fileNodes = plugin.Files;
+            if (fileNodes == null)
             {
                 Console.WriteLine($"[WARNING] Plugin {plugin.Name} has no files. This might be fine for intro or information pages.");
                 return;
             }
-            Console.WriteLine($"Processing file node {fileNode!.Value}");
 
-            string? sourcePath = null;
-            for (var i = 0; i < fileNode!.Attributes!.Count; i++)
+            List<string> espPaths = [];
+
+            foreach (var fileList in fileNodes)
             {
-                var attr = fileNode.Attributes[i];
-                Console.WriteLine(attr.Name + " => " + attr.Value);
-                if (attr.Name.Equals("source") && IsPluginFileName(attr.Value))
-                {
-                    sourcePath = attr.Value;
-                }
+                if (!fileList.FileSpecified) return;
+                espPaths.AddRange(fileList.File.Select(fileSystemItem => fileSystemItem.Source));
             }
 
-            if (sourcePath == null)
+            List<string> masters = [];
+            foreach (var sourcePath in espPaths)
             {
-                return;
+                Console.WriteLine("Opening " + sourcePath + " to parse masters");
+                var espPath = fomodPath.Replace("fomod", sourcePath);
+                masters.AddRange(GetMasters(espPath));
             }
-            Console.WriteLine("Opening " + sourcePath + " to parse masters");
-
-            var espPath = fomodPath.Replace("fomod", sourcePath);
-            var masters = GetMasters(espPath);
-            Console.WriteLine("Got masters for " + sourcePath);
-            masters.ForEach(Console.WriteLine);
 
             if (masters.Count < 2)
             {
-                Console.WriteLine($"Not generating recommendations for {pluginName}. Too few masters.");
+                // Console.WriteLine($"Not generating recommendations for {pluginName}. Too few masters.");
                 return;
             }
             
@@ -94,12 +91,12 @@ namespace PrettyFOMOD
                  we want to remove the <type /> element and replace with our generated condition node.
              */
             var typeDescriptorNode = FomodXmlUtils.ResetTypeDescriptorForPluginNode(plugin);
-            var conditionNode = GenerateRecommendedConditionNodeForMasters(plugin.OwnerDocument!, masters);
+            var conditionNode = GenerateRecommendedConditionNodeForMasters(masters);
             Console.WriteLine("Adding recommendations to XML");
-            typeDescriptorNode.AppendChild(conditionNode);
+            typeDescriptorNode.DependencyType = conditionNode;
         }
 
-        private static XmlElement GenerateRecommendedConditionNodeForMasters(XmlDocument document, List<string> masters)
+        private static DependencyPluginType GenerateRecommendedConditionNodeForMasters(List<string> masters)
         {
             /* Create a node within `plugin.typeDescriptor` marking something as Recommended if masters are present
              Example here:
@@ -120,39 +117,69 @@ namespace PrettyFOMOD
                 In past FOMODs I've created a separate condition to disable the checkbox if the plugin is missing,
                 but this seems overly restrictive and not really useful to anyone. 
              */
+            
+            
+            // Working from the inside, out. Create a dependencies node with fileDependency children
+            var compositeDependency = new CompositeDependency
+            {
+                Operator = CompositeDependencyOperator.And
+            };
 
-            var dependenciesNode = document.CreateElement(Constants.ElementNames.Dependencies);
-            dependenciesNode.SetAttribute(Constants.AttributeNames.Operator, Constants.AttributeValues.OperatorAnd);
             foreach (var master in masters)
             {
-                var fileDependencyNode = document.CreateElement(Constants.ElementNames.FileDependency);
-                fileDependencyNode.SetAttribute(Constants.AttributeNames.File, master);
-                fileDependencyNode.SetAttribute(Constants.AttributeNames.State, Constants.AttributeValues.FileStateActive);
-
-                dependenciesNode.AppendChild(fileDependencyNode);
+                var fileDependency = new FileDependency() { File = master, State = FileDependencyState.Active };
+                compositeDependency.FileDependency.Add(fileDependency);
             }
-
-            var patternNode = document.CreateElement(Constants.ElementNames.Pattern);
-            patternNode.AppendChild(dependenciesNode);
             
-            // Also append <type name="Recommended"/> to patternNode
-            var patternTypeNode = document.CreateElement(Constants.ElementNames.Type);
-            patternTypeNode.SetAttribute(Constants.AttributeNames.Name,
-                Constants.AttributeValues.PatternTypeRecommended);
-            patternNode.AppendChild(patternTypeNode); 
+            // create pattern
+            DependencyPattern pattern = new DependencyPattern()
+            {
+                Dependencies = compositeDependency,
+                Type = new PluginType() { Name = PluginTypeEnum.Recommended }
+            };
+            DependencyPluginType dependencyPluginType = new DependencyPluginType()
+            {
+                Patterns = { pattern },
+                DefaultType = new PluginType() { Name = PluginTypeEnum.Optional }
+            };
+            return dependencyPluginType;
 
-            var patternsNode = document.CreateElement(Constants.ElementNames.Patterns);
-            patternsNode.AppendChild(patternNode);
-            
+            // return new PluginTypeDescriptor()
+            // {
+            //     Type = new PluginType() { Name = PluginTypeEnum.Recommended },
+            //     DependencyType = dependencyPluginType
+            // };
 
-            var dependencyTypeNode = document.CreateElement(Constants.ElementNames.DependencyType);
-            var defaultTypeNode = document.CreateElement(Constants.ElementNames.DefaultType);
-            defaultTypeNode.SetAttribute(Constants.AttributeNames.Name, Constants.AttributeValues.TypeNameOptional);
-
-            dependencyTypeNode.AppendChild(defaultTypeNode);
-            dependencyTypeNode.AppendChild(patternsNode);
-
-            return dependencyTypeNode;
+            // foreach (var master in masters)
+            // {
+            //     var fileDependencyNode = document.CreateElement(Constants.ElementNames.FileDependency);
+            //     fileDependencyNode.SetAttribute(Constants.AttributeNames.File, master);
+            //     fileDependencyNode.SetAttribute(Constants.AttributeNames.State, Constants.AttributeValues.FileStateActive);
+            //
+            //     dependenciesNode.AppendChild(fileDependencyNode);
+            // }
+            //
+            // var patternNode = document.CreateElement(Constants.ElementNames.Pattern);
+            // patternNode.AppendChild(dependenciesNode);
+            //
+            // // Also append <type name="Recommended"/> to patternNode
+            // var patternTypeNode = document.CreateElement(Constants.ElementNames.Type);
+            // patternTypeNode.SetAttribute(Constants.AttributeNames.Name,
+            //     Constants.AttributeValues.PatternTypeRecommended);
+            // patternNode.AppendChild(patternTypeNode); 
+            //
+            // var patternsNode = document.CreateElement(Constants.ElementNames.Patterns);
+            // patternsNode.AppendChild(patternNode);
+            //
+            //
+            // var dependencyTypeNode = document.CreateElement(Constants.ElementNames.DependencyType);
+            // var defaultTypeNode = document.CreateElement(Constants.ElementNames.DefaultType);
+            // defaultTypeNode.SetAttribute(Constants.AttributeNames.Name, Constants.AttributeValues.TypeNameOptional);
+            //
+            // dependencyTypeNode.AppendChild(defaultTypeNode);
+            // dependencyTypeNode.AppendChild(patternsNode);
+            //
+            // return dependencyTypeNode;
         }
 
         #region Plugin File Parsing
@@ -195,24 +222,31 @@ namespace PrettyFOMOD
             return Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
         }
         
-        private static XmlDocument OpenFomodFile(string fomodDirectoryPath)
+        private static ModuleConfiguration OpenFomodFile(string fomodDirectoryPath)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.Load(Path.Combine(fomodDirectoryPath, "ModuleConfig.xml"));
-            return doc;
-        }
+            
+            ModuleConfiguration configuration = null!;
+            var serializer = new XmlSerializer(typeof(ModuleConfiguration));
 
-        private static void BackupModuleConfig(XmlDocument document, string fomodPath)
+            using XmlReader reader = new XmlNodeReader(doc);
+            configuration = (ModuleConfiguration)serializer.Deserialize(reader)!;
+
+            return configuration;
+        }
+        
+        private static void BackupModuleConfig(string fomodPath)
         {
             PrintSeparator();
-            string fomodFilePath = Path.Combine(fomodPath, Constants.Filenames.ModuleFile);
+            var fomodFilePath = Path.Combine(fomodPath, Constants.Filenames.ModuleFile);
             
             var backupPath = fomodFilePath.Replace(
                 Constants.Filenames.ModuleFile,
                 Constants.Filenames.BackupFileName());
             
             Console.WriteLine($"Backing up {Constants.Filenames.ModuleFile} to " + backupPath);
-            document.Save(backupPath);
+            File.Copy(fomodFilePath, backupPath, false);
         }
 
         private static void RemoveTestDocument(string fomodPath)
@@ -222,7 +256,7 @@ namespace PrettyFOMOD
             File.Delete(filePath);
         }
 
-        private static void SaveFomod(XmlDocument document, string fomodPath, PrettyFomodConfig config)
+        private static void SaveFomod(ModuleConfiguration moduleConfiguration, string fomodPath, PrettyFomodConfig config)
         {
             PrintSeparator();
             Console.WriteLine("Saving FOMOD. Here goes nothin'!");
@@ -231,7 +265,16 @@ namespace PrettyFOMOD
                 ? Path.Combine(fomodPath, Constants.Filenames.DummyFile)
                 : Path.Combine(fomodPath, Constants.Filenames.ModuleFile);
             
-            document.Save(filePath);
+            // TODO: Dunno if this is totally wise.
+            File.Delete(filePath);
+            
+            var serializer = new XmlSerializer(typeof(ModuleConfiguration));
+            using (var writer = new StreamWriter(filePath))
+            {
+                serializer.Serialize(writer, moduleConfiguration);
+            }
+
+            // document.Save(filePath);
             Console.WriteLine($"FOMOD saved to {filePath}");
         }
         
