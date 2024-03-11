@@ -14,6 +14,14 @@ namespace PrettyFOMOD
             var config = GetConfig(args);
             Console.WriteLine("Arguments parsed: " + config);
 
+            if (!config.GenerateFull)
+            {
+                DoSmartConditions(config);
+            }
+        }
+
+        private static void DoSmartConditions(PrettyFomodConfig config)
+        {
             // For ease of testing in an IDE, I nest resources in the CWD/test folder. Set your run arg to -test if debugging 
             var fomodPath = config.Test
                 ? Path.Combine(GetCwdPath()!, "test\\fomod")
@@ -34,15 +42,9 @@ namespace PrettyFOMOD
 
             BackupModuleConfig(doc, fomodPath);
             SaveFomod(doc, fomodPath, config);
-        }
-
-
-        private static string? GetCwdPath()
-        {
-            return Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
             
         }
-
+        
         // This region is just for combing through the hierarchy of FOMOD XML files. There is probably a better way
         // to do this with XPath selectors or something, but this works for a standard FOMOD file.
         #region XML Ephemera
@@ -212,6 +214,11 @@ namespace PrettyFOMOD
         #endregion
 
         #region File I/O
+        
+        private static string? GetCwdPath()
+        {
+            return Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
+        }
         
         private static XmlDocument OpenFomodFile(string fomodDirectoryPath)
         {
