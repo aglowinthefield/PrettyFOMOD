@@ -46,7 +46,6 @@ namespace PrettyFOMOD
             // serialize back to doc
             BackupModuleConfig(fomodPath);
             SaveFomod(doc, fomodPath, config);
-            
         }
         
         private static void ProcessPlugin(Plugin plugin, string fomodPath)
@@ -132,54 +131,18 @@ namespace PrettyFOMOD
             }
             
             // create pattern
-            DependencyPattern pattern = new DependencyPattern()
+            var pattern = new DependencyPattern()
             {
                 Dependencies = compositeDependency,
                 Type = new PluginType() { Name = PluginTypeEnum.Recommended }
             };
-            DependencyPluginType dependencyPluginType = new DependencyPluginType()
+            
+            var dependencyPluginType = new DependencyPluginType()
             {
                 Patterns = { pattern },
                 DefaultType = new PluginType() { Name = PluginTypeEnum.Optional }
             };
             return dependencyPluginType;
-
-            // return new PluginTypeDescriptor()
-            // {
-            //     Type = new PluginType() { Name = PluginTypeEnum.Recommended },
-            //     DependencyType = dependencyPluginType
-            // };
-
-            // foreach (var master in masters)
-            // {
-            //     var fileDependencyNode = document.CreateElement(Constants.ElementNames.FileDependency);
-            //     fileDependencyNode.SetAttribute(Constants.AttributeNames.File, master);
-            //     fileDependencyNode.SetAttribute(Constants.AttributeNames.State, Constants.AttributeValues.FileStateActive);
-            //
-            //     dependenciesNode.AppendChild(fileDependencyNode);
-            // }
-            //
-            // var patternNode = document.CreateElement(Constants.ElementNames.Pattern);
-            // patternNode.AppendChild(dependenciesNode);
-            //
-            // // Also append <type name="Recommended"/> to patternNode
-            // var patternTypeNode = document.CreateElement(Constants.ElementNames.Type);
-            // patternTypeNode.SetAttribute(Constants.AttributeNames.Name,
-            //     Constants.AttributeValues.PatternTypeRecommended);
-            // patternNode.AppendChild(patternTypeNode); 
-            //
-            // var patternsNode = document.CreateElement(Constants.ElementNames.Patterns);
-            // patternsNode.AppendChild(patternNode);
-            //
-            //
-            // var dependencyTypeNode = document.CreateElement(Constants.ElementNames.DependencyType);
-            // var defaultTypeNode = document.CreateElement(Constants.ElementNames.DefaultType);
-            // defaultTypeNode.SetAttribute(Constants.AttributeNames.Name, Constants.AttributeValues.TypeNameOptional);
-            //
-            // dependencyTypeNode.AppendChild(defaultTypeNode);
-            // dependencyTypeNode.AppendChild(patternsNode);
-            //
-            // return dependencyTypeNode;
         }
 
         #region Plugin File Parsing
