@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Folder Include="test\ff\" />
       <Folder Include="test\fomod\" />
     </ItemGroup>
 

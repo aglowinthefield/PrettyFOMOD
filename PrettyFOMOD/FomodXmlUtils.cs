@@ -2,7 +2,7 @@
 
 namespace PrettyFOMOD;
 
-public class FomodXmlUtils
+public static class FomodXmlUtils
 {
     public static XmlNode ResetTypeDescriptorForPluginNode(XmlNode pluginNode)
     {

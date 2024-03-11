@@ -9,7 +9,7 @@ public class PrettyFomodConfig
     public override string ToString()
     {
         return $"[\n\t" +
-               $"Test = {this.Test}" +
+               $"Test = {Test}" +
                $"\n]";
     }
 }

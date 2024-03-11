@@ -42,7 +42,6 @@ public static class Constants
         public const string FileStateActive = "Active";
         public const string TypeNameOptional = "Optional";
         public const string PatternTypeRecommended = "Recommended";
-        public const string PatternTypeOptional = "Optional";
     }
     
 }

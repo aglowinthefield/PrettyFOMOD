@@ -83,10 +83,16 @@ namespace PrettyFOMOD
 
         private static void ProcessPlugin(XmlNode plugin, string fomodPath)
         {
-            Console.WriteLine("Processing plugin " + plugin.Attributes!["name"]!.Value);
+            var pluginName = plugin.Attributes!["name"]!.Value;
+            Console.WriteLine("Processing plugin " + pluginName);
             // TODO: collect multiple source paths. Could have multiple files in here.
             var fileNode = plugin.SelectSingleNode("files/file");
-            Console.WriteLine("Processing file node");
+            if (fileNode == null)
+            {
+                Console.WriteLine($"[WARNING] Plugin {plugin.Name} has no files. This might be fine for intro or information pages.");
+                return;
+            }
+            Console.WriteLine($"Processing file node {fileNode!.Value}");
 
             string? sourcePath = null;
             for (var i = 0; i < fileNode!.Attributes!.Count; i++)
@@ -237,7 +243,7 @@ namespace PrettyFOMOD
                 Constants.Filenames.BackupFileName());
             
             Console.WriteLine($"Backing up {Constants.Filenames.ModuleFile} to " + backupPath);
-            document.Save(@backupPath);
+            document.Save(backupPath);
         }
 
         private static void RemoveTestDocument(string fomodPath)
