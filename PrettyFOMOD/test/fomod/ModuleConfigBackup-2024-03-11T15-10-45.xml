@@ -1,0 +1,25 @@
+<!-- Created with FOMOD Creation Tool 1.7.0.37 [http://www.nexusmods.com/fallout4/mods/6821] -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+  <moduleName>
+  </moduleName>
+  <installSteps order="Explicit">
+    <installStep name="Step1">
+      <optionalFileGroups order="Explicit">
+        <group name="test" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="northern roads - natural waterfalls">
+              <description>
+              </description>
+              <files>
+                <file source="aglow_Natural Waterfalls - Northern Roads Patch.esp" destination="aglow_Natural Waterfalls - Northern Roads Patch.esp" priority="0" />
+              </files>
+              <typeDescriptor>
+                <type name="Optional" />
+              </typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+      </optionalFileGroups>
+    </installStep>
+  </installSteps>
+</config>
