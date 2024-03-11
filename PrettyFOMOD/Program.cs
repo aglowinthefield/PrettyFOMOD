@@ -24,7 +24,7 @@ namespace PrettyFOMOD
         {
             // For ease of testing in an IDE, I nest resources in the CWD/test folder. Set your run arg to -test if debugging 
             var fomodPath = config.Test
-                ? Path.Combine(GetCwdPath()!, "test\\fomod")
+                ? Path.Combine(GetCwdPath()!, "test\\ff\\fomod")
                 : Path.Combine(GetCwdPath()!, "fomod");
 
             if (config.Test)
@@ -65,7 +65,8 @@ namespace PrettyFOMOD
             var groups = installStep.ChildNodes[0]!.ChildNodes;
             for (var i = 0; i < groups.Count; i++)
             {
-                ProcessGroup(groups[i]!, fomodPath);
+                var group = groups[i]!;
+                ProcessGroup(group, fomodPath);
             }
         }
 
@@ -115,6 +116,12 @@ namespace PrettyFOMOD
             var masters = GetMasters(espPath);
             Console.WriteLine("Got masters for " + sourcePath);
             masters.ForEach(Console.WriteLine);
+
+            if (masters.Count < 2)
+            {
+                Console.WriteLine($"Not generating recommendations for {plugin}. Too few masters.");
+                return;
+            }
             
             /*   Check if there's anything under typeDescriptor currently. Basic FOMODs will automatically include
                  something like this

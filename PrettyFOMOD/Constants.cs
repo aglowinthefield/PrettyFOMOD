@@ -44,4 +44,9 @@ public static class Constants
         public const string PatternTypeRecommended = "Recommended";
     }
     
+    public static class GroupTypes
+    {
+        public const string SelectAny = "SelectAny";
+        public const string SelectExactlyOne = "SelectExactlyOne";
+    }
 }
