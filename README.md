@@ -16,6 +16,15 @@ Doing this all in the FOMOD creator, lovely though it may be, is time consuming 
 
 <img src="./doc/ffcomp.png" width="800">
 
+## Requirements
+
+At the moment you do still have to _create_ a FOMOD first, with the requisite steps, sub-steps, etc. You just don't need
+to worry about writing suggestion logic.
+
+That is, you will already have a `fomod\` folder.
+
+In the future this tool will be able to generate a FOMOD based on a directory listing of files.
+
 ## Usage
 
 *At time of writing, you have to clone the repository and build the project to generate an .exe. Once some more testing
