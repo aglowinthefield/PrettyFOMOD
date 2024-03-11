@@ -1,4 +1,5 @@
-﻿![prettyFOMOD image](./img.png)
+﻿# This is a work in progress. Without a GitHub release available, clone at your own peril.
+![prettyFOMOD image](./img.png)
 
 ## Who is PrettyFOMOD for?
 Mod creators and patch collection authors.
