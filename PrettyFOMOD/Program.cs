@@ -34,10 +34,10 @@ namespace PrettyFOMOD
             
             var doc = OpenFomodFile(fomodPath);
 
-            var steps = GetInstallSteps(doc);
-            for (var i = 0; i < steps.Count; i++)
+            var pluginNodes = FomodXmlUtils.GetPluginNodes(doc);
+            foreach (var pluginNode in pluginNodes)
             {
-                ProcessInstallStep(steps.Item(i)!, fomodPath);
+                ProcessPlugin(pluginNode, fomodPath);
             }
 
             BackupModuleConfig(doc, fomodPath);
@@ -45,43 +45,6 @@ namespace PrettyFOMOD
             
         }
         
-        // This region is just for combing through the hierarchy of FOMOD XML files. There is probably a better way
-        // to do this with XPath selectors or something, but this works for a standard FOMOD file.
-        #region XML Ephemera
-        
-        private static XmlNodeList GetInstallSteps(XmlDocument fomod)
-        {
-            // find "config" childnode and return its child nodes
-            if (fomod.DocumentElement == null) throw new Exception("Malformed XML");
-            var xmlNodeList = fomod.DocumentElement.SelectSingleNode("/config/installSteps")?.ChildNodes;
-            if (xmlNodeList != null)
-            {
-                return xmlNodeList;
-            }
-            throw new Exception("Malformed XML");
-        }
-        private static void ProcessInstallStep(XmlNode installStep, string fomodPath)
-        {
-            var groups = installStep.ChildNodes[0]!.ChildNodes;
-            for (var i = 0; i < groups.Count; i++)
-            {
-                var group = groups[i]!;
-                ProcessGroup(group, fomodPath);
-            }
-        }
-
-        private static void ProcessGroup(XmlNode group, string fomodPath)
-        {
-            // group has a 'plugins' child with each plugin inside
-            var plugins = group.ChildNodes[0];
-            for (var i = 0; i < plugins!.ChildNodes.Count; i++)
-            {
-                ProcessPlugin(plugins.ChildNodes[i]!, fomodPath);
-            }
-        }
-
-        #endregion
-
         private static void ProcessPlugin(XmlNode plugin, string fomodPath)
         {
             var pluginName = plugin.Attributes!["name"]!.Value;
@@ -119,7 +82,7 @@ namespace PrettyFOMOD
 
             if (masters.Count < 2)
             {
-                Console.WriteLine($"Not generating recommendations for {plugin}. Too few masters.");
+                Console.WriteLine($"Not generating recommendations for {pluginName}. Too few masters.");
                 return;
             }
             
@@ -130,7 +93,6 @@ namespace PrettyFOMOD
                       </typeDescriptor>
                  we want to remove the <type /> element and replace with our generated condition node.
              */
-
             var typeDescriptorNode = FomodXmlUtils.ResetTypeDescriptorForPluginNode(plugin);
             var conditionNode = GenerateRecommendedConditionNodeForMasters(plugin.OwnerDocument!, masters);
             Console.WriteLine("Adding recommendations to XML");
