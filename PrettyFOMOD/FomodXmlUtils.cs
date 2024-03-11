@@ -41,24 +41,18 @@ public static class FomodXmlUtils
      * if we have a FOMOD that install a 'base' mod, then patches for that base mod, we don't want to include the
      * base mod in the fileDependency list because the user won't have installed it yet!
      */
-    public static HashSet<string> GenerateFomodDestinationESPCache(ModuleConfiguration configuration)
+    public static HashSet<string> GenerateFomodDestinationEspCache(ModuleConfiguration configuration)
     {
         var cache = new HashSet<string>();
         
-        foreach (var installStep in configuration.InstallSteps.InstallStep)
+        foreach (var plugin in GetPluginNodes(configuration))
         {
-            foreach (var group in installStep.OptionalFileGroups.Group)
+            if (!plugin.FilesSpecified) continue;
+            foreach (var pluginFile in plugin.Files)
             {
-                foreach (var plugin in group.Plugins.Plugin)
+                foreach (var fileSystemItem in pluginFile.File)
                 {
-                    if (!plugin.FilesSpecified) continue;
-                    foreach (var pluginFile in plugin.Files)
-                    {
-                        foreach (var fileSystemItem in pluginFile.File)
-                        {
-                            cache.Add(GetEspFilenameFromPath(fileSystemItem.Destination));
-                        }
-                    }
+                    cache.Add(GetEspFilenameFromPath(fileSystemItem.Destination));
                 }
             }
         }

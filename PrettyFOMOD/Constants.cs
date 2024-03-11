@@ -16,37 +16,4 @@ public static class Constants
             return $"ModuleConfigBackup-{date}.xml";
         }
     }
-    
-    public static class ElementNames
-    {
-        public const string Dependencies = "dependencies";
-        public const string FileDependency = "fileDependency";
-        public const string Pattern = "pattern";
-        public const string Patterns = "patterns";
-        public const string DependencyType = "dependencyType";
-        public const string TypeDescriptor = "typeDescriptor";
-        public const string DefaultType = "defaultType";
-        public const string Type = "type";
-    }
-    public static class AttributeNames
-    {
-        public const string Operator = "operator";
-        public const string File = "file";
-        public const string State = "state";
-        public const string Name = "name";
-
-    }
-    public static class AttributeValues
-    {
-        public const string OperatorAnd = "And";
-        public const string FileStateActive = "Active";
-        public const string TypeNameOptional = "Optional";
-        public const string PatternTypeRecommended = "Recommended";
-    }
-    
-    public static class GroupTypes
-    {
-        public const string SelectAny = "SelectAny";
-        public const string SelectExactlyOne = "SelectExactlyOne";
-    }
 }

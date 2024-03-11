@@ -35,7 +35,7 @@ namespace PrettyFOMOD
             
             var moduleConfiguration = OpenFomodFile(fomodPath);
 
-            var cache = FomodXmlUtils.GenerateFomodDestinationESPCache(moduleConfiguration);
+            var cache = FomodXmlUtils.GenerateFomodDestinationEspCache(moduleConfiguration);
             
             var pluginNodes = FomodXmlUtils.GetPluginNodes(moduleConfiguration);
             foreach (var pluginNode in pluginNodes)
