@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrettyFOMOD", "PrettyFOMOD\PrettyFOMOD.csproj", "{C6E4A6CC-1F02-4735-8230-84BDFC7EA25B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glow.PrettyFOMOD", "Glow.PrettyFOMOD\Glow.PrettyFOMOD.csproj", "{C6E4A6CC-1F02-4735-8230-84BDFC7EA25B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

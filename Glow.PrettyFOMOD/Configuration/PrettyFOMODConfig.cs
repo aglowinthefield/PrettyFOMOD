@@ -1,4 +1,4 @@
-﻿namespace PrettyFOMOD;
+﻿namespace Glow.PrettyFOMOD.Configuration;
 
 public class PrettyFomodConfig
 {
@@ -10,6 +10,8 @@ public class PrettyFomodConfig
     {
         return $"[\n\t" +
                $"Test = {Test}" +
+               $"Generate Full = {GenerateFull}" +
+               $"Generate Smart Conditions = {SmartConditions}" +
                $"\n]";
     }
 }

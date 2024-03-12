@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Xml;
-
-namespace PrettyFOMOD;
+﻿namespace Glow.PrettyFOMOD.Helpers;
 
 public static class FomodXmlUtils
 {

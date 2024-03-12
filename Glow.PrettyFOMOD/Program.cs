@@ -1,42 +1,50 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
+using Glow.PrettyFOMOD.Configuration;
+using Glow.PrettyFOMOD.FomodFileIO;
+using Glow.PrettyFOMOD.Helpers;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
+using Constants = Glow.PrettyFOMOD.Helpers.Constants;
 
-namespace PrettyFOMOD
+namespace Glow.PrettyFOMOD
 {
     class Program
     {
         static void Main(string[] args)
         {
             Warmup.Init();
-            Console.WriteLine("Hello, World. We're warmed up.");
             
             var config = GetConfig(args);
             Console.WriteLine("Arguments parsed: " + config);
 
-            if (!config.GenerateFull)
+            switch (config.GenerateFull)
             {
-                DoSmartConditions(config);
+                case false:
+                    DoSmartConditions(config);
+                    break;
+                case true:
+                    DoGenerateFull(config);
+                    break;
             }
         }
 
+        private static void DoGenerateFull(PrettyFomodConfig config)
+        {
+            FomodInfoCreator.CreateInfoFile(config);
+        }
+        
         private static void DoSmartConditions(PrettyFomodConfig config)
         {
-            // For ease of testing in an IDE, I nest resources in the CWD/test folder. Set your run arg to -test if debugging 
-            var fomodPath = config.Test
-                ? Path.Combine(GetCwdPath()!, @"test\ff\fomod")
-                : Path.Combine(GetCwdPath()!, "fomod");
+            var fomodPath = FomodFileIo.GetFomodPath(config);
 
             if (config.Test)
             {
                 RemoveTestDocument(fomodPath);
             }
             
-            var moduleConfiguration = OpenFomodFile(fomodPath);
-
+            var moduleConfiguration = FomodFileIo.OpenFomodFile(fomodPath);
             var cache = FomodXmlUtils.GenerateFomodDestinationEspCache(moduleConfiguration);
-            
             var pluginNodes = FomodXmlUtils.GetPluginNodes(moduleConfiguration);
             foreach (var pluginNode in pluginNodes)
             {
@@ -44,9 +52,10 @@ namespace PrettyFOMOD
             }
 
             // serialize back to doc
-            BackupModuleConfig(fomodPath);
-            SaveFomod(moduleConfiguration, fomodPath, config);
+            FomodFileIo.BackupModuleConfig(fomodPath);
+            FomodFileIo.SaveFomod(moduleConfiguration, config);
         }
+
         
         private static void ProcessPlugin(Plugin plugin, string fomodPath, HashSet<string> destinationCache)
         {
@@ -69,10 +78,8 @@ namespace PrettyFOMOD
             }
 
             List<string> masters = [];
-            foreach (var sourcePath in espPaths)
+            foreach (var espPath in espPaths.Select(sourcePath => fomodPath.Replace("fomod", sourcePath)))
             {
-                Console.WriteLine("Opening " + sourcePath + " to parse masters");
-                var espPath = fomodPath.Replace("fomod", sourcePath);
                 masters.AddRange(GetMasters(espPath));
             }
 
@@ -95,10 +102,8 @@ namespace PrettyFOMOD
             typeDescriptorNode.DependencyType = conditionNode;
         }
 
-        private static DependencyPluginType GenerateRecommendedConditionNodeForMasters(
-            List<string> masters,
-            HashSet<string> destinationCache
-            )
+        // ReSharper disable once SuggestBaseTypeForParameter
+        private static DependencyPluginType GenerateRecommendedConditionNodeForMasters(List<string> masters, HashSet<string> destinationCache)
         {
             /* Create a node within `plugin.typeDescriptor` marking something as Recommended if masters are present
              Example here:
@@ -154,7 +159,7 @@ namespace PrettyFOMOD
             return dependencyPluginType;
         }
 
-        #region Plugin File Parsing
+        #region Plugin FomodFileIO Parsing
         private static List<string> GetMasters(string espPath)
         {
             using var mod = SkyrimMod.CreateFromBinaryOverlay(espPath, SkyrimRelease.SkyrimSE);
@@ -182,70 +187,26 @@ namespace PrettyFOMOD
             {
                 config.Test = true;
             }
+
+            if (args.Any(a => a.ToLower().Equals("-generatefull")))
+            {
+                config.GenerateFull = true;
+                config.SmartConditions = false;
+            }
             return config;
         }
 
         #endregion
 
-        #region File I/O
+        #region FomodFileIO I/O
         
-        private static string? GetCwdPath()
-        {
-            return Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
-        }
-        
-        private static ModuleConfiguration OpenFomodFile(string fomodDirectoryPath)
-        {
-            var doc = new XmlDocument();
-            doc.Load(Path.Combine(fomodDirectoryPath, "ModuleConfig.xml"));
-
-            var serializer = new XmlSerializer(typeof(ModuleConfiguration));
-
-            using XmlReader reader = new XmlNodeReader(doc);
-            return (ModuleConfiguration)serializer.Deserialize(reader)!;
-        }
-        
-        private static void BackupModuleConfig(string fomodPath)
-        {
-            PrintSeparator();
-            var fomodFilePath = Path.Combine(fomodPath, Constants.Filenames.ModuleFile);
-            
-            var backupPath = fomodFilePath.Replace(
-                Constants.Filenames.ModuleFile,
-                Constants.Filenames.BackupFileName());
-            
-            Console.WriteLine($"Backing up {Constants.Filenames.ModuleFile} to " + backupPath);
-            File.Copy(fomodFilePath, backupPath, false);
-        }
-
         private static void RemoveTestDocument(string fomodPath)
         {
-            var filePath = Path.Combine(fomodPath, Constants.Filenames.DummyFile);
+            var filePath = Path.Combine(fomodPath, Constants.Filenames.DummyModuleFile);
             Console.WriteLine($"Deleting dummy file at path {filePath}");
             File.Delete(filePath);
         }
 
-        private static void SaveFomod(ModuleConfiguration moduleConfiguration, string fomodPath, PrettyFomodConfig config)
-        {
-            PrintSeparator();
-            Console.WriteLine("Saving FOMOD. Here goes nothin'!");
-
-            var filePath = config.Test
-                ? Path.Combine(fomodPath, Constants.Filenames.DummyFile)
-                : Path.Combine(fomodPath, Constants.Filenames.ModuleFile);
-            
-            // TODO: Dunno if this is totally wise.
-            File.Delete(filePath);
-            
-            var serializer = new XmlSerializer(typeof(ModuleConfiguration));
-            using (var writer = new StreamWriter(filePath))
-            {
-                serializer.Serialize(writer, moduleConfiguration);
-            }
-            
-            Console.WriteLine($"FOMOD saved to {filePath}");
-        }
-        
         #endregion
 
         #region Constants
@@ -268,12 +229,6 @@ namespace PrettyFOMOD
             return fileName.Contains(".esp")
                    || fileName.Contains(".esl")
                    || fileName.Contains(".esm");
-        }
-
-        private static void PrintSeparator()
-        {
-            Console.WriteLine("---------------");
-            Console.WriteLine();
         }
 
         #endregion
