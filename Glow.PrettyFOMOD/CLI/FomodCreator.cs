@@ -67,12 +67,23 @@ public class FomodCreator(PrettyFomodConfig config)
     {
         // this is where we might want to group by common master or some similar heuristic
         
+        
         // Gather all ESPs
         var espPaths = Directory.GetFiles(_cwd).Where(FomodUtils.IsPluginFileName);
         
+        // generate the cache here
+        HashSet<string> fomodProvidedMasterEspCache = [];
+        var enumerable = espPaths.ToList();
+        foreach (var espPath in enumerable)
+        {
+            fomodProvidedMasterEspCache.Add(FomodUtils.GetEspFilenameFromPath(espPath));
+        }
+        
         var groupPlugins = new PluginList() {
             Order = OrderEnum.Explicit,
-            Plugin = new Collection<Plugin>(espPaths.Select(CreatePluginFromEspPath).ToList())
+            Plugin = new Collection<Plugin>(enumerable
+                .Select(path => CreatePluginFromEspPath(path, fomodProvidedMasterEspCache))
+                .ToList())
         };
         
         var groupList = new GroupList()
@@ -91,7 +102,7 @@ public class FomodCreator(PrettyFomodConfig config)
         return groupList;
     }
 
-    private Plugin CreatePluginFromEspPath(string espPath)
+    private Plugin CreatePluginFromEspPath(string espPath, HashSet<string> fomodMasterCache)
     {
         var masters = FomodUtils.GetMasters(espPath);
         return new Plugin()
@@ -120,7 +131,7 @@ public class FomodCreator(PrettyFomodConfig config)
                 },
                 // NOTE: we aren't using a cache now but we probably want to recursively scan mods to make sure
                 // we don't encounter clashing masters with installed plugins from the same mod.
-                DependencyType = FomodUtils.GenerateRecommendedConditionNodeForMasters(masters.ToList(), []),
+                DependencyType = FomodUtils.GenerateRecommendedConditionNodeForMasters(masters.ToList(), fomodMasterCache),
             }
         };
     }

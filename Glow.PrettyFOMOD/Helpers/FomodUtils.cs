@@ -20,7 +20,7 @@ public static class FomodUtils
     }
     
     // ReSharper disable once SuggestBaseTypeForParameter
-    public static DependencyPluginType GenerateRecommendedConditionNodeForMasters(List<string> masters, HashSet<string> destinationCache)
+    public static DependencyPluginType? GenerateRecommendedConditionNodeForMasters(List<string> _masters, HashSet<string> destinationCache)
     {
         /* Create a node within `plugin.typeDescriptor` marking something as Recommended if masters are present
          Example here:
@@ -49,7 +49,13 @@ public static class FomodUtils
             Operator = CompositeDependencyOperator.And
         };
 
-        foreach (var master in masters)
+        var externalMasters = _masters.Where(m => !destinationCache.Contains(m)).ToList();
+        if (!externalMasters.Any())
+        {
+            return null;
+        }
+
+        foreach (var master in externalMasters)
         {
             if (destinationCache.Contains(master))
             {
