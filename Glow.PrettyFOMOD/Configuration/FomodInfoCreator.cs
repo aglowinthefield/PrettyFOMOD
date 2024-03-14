@@ -2,7 +2,7 @@
 
 namespace Glow.PrettyFOMOD.Configuration;
 
-public class FomodInfoCreator
+public static class FomodInfoCreator
 {
     /*
      * 1. Check for existing info and populate FomodInfo class
@@ -19,8 +19,6 @@ public class FomodInfoCreator
         fomodInfo.Version = ReadLine.Read("Version: ", fomodInfo.Version);
         
         // TODO: Figure out groups.
-        
         FomodFileIo.SaveFomodInfo(fomodInfo, config);
-        
     }
 }

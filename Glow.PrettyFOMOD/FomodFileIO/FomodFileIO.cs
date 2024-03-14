@@ -11,7 +11,14 @@ public static class FomodFileIo
     public static string GetFomodPath(PrettyFomodConfig config)
     {
         // For ease of testing in an IDE, I nest resources in the CWD/test folder. Set your run arg to -test if debugging 
-        return config.Test ? Path.Combine(GetCwdPath()!, @"test\fomod") : Path.Combine(GetCwdPath()!, "fomod");
+        var filePath = config.Test ? Path.Combine(GetCwdPath()!, @"test\fomod") : Path.Combine(GetCwdPath()!, "fomod");
+        
+        if (config is { GenerateFull: true, Test: true })
+        {
+            filePath = filePath.Replace(@"test\fomod", @"test\generator\fomod");
+        }
+
+        return filePath;
     }
     
     public static ModuleConfiguration OpenFomodFile(string fomodDirectoryPath)
@@ -23,6 +30,13 @@ public static class FomodFileIo
 
         using XmlReader reader = new XmlNodeReader(doc);
         return (ModuleConfiguration)serializer.Deserialize(reader)!;
+    }
+    
+    public static void SetupEmptyFomodDirectory(PrettyFomodConfig config)
+    {
+        Directory.CreateDirectory(config.Test
+            ? Path.Combine(GetCwdPath()!, @"test\generator\fomod")
+            : Path.Combine(GetCwdPath()!, "fomod"));
     }
 
     public static FomodInfo OpenFomodInfoFile(PrettyFomodConfig config)
@@ -72,7 +86,7 @@ public static class FomodFileIo
 
         var fomodPath = GetFomodPath(config);
 
-        var filePath = config.Test
+        var filePath = config.UseDummyFileNames
             ? Path.Combine(fomodPath, Constants.Filenames.DummyModuleFile)
             : Path.Combine(fomodPath, Constants.Filenames.ModuleFile);
         
@@ -107,7 +121,7 @@ public static class FomodFileIo
 
         var fomodPath = GetFomodPath(config);
         
-        var filePath = config.Test
+        var filePath = config.UseDummyFileNames
             ? Path.Combine(fomodPath, Constants.Filenames.DummyInfoFile)
             : Path.Combine(fomodPath, Constants.Filenames.InfoFile);
         
@@ -123,8 +137,8 @@ public static class FomodFileIo
         Console.WriteLine($"FOMOD Info saved to {filePath}");
     }
     
-    private static string? GetCwdPath()
+    public static string GetCwdPath()
     {
-        return Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
+        return Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!;
     }
 }

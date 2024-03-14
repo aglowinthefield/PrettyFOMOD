@@ -1,5 +1,6 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
+using Glow.PrettyFOMOD.CLI;
 using Glow.PrettyFOMOD.Configuration;
 using Glow.PrettyFOMOD.FomodFileIO;
 using Glow.PrettyFOMOD.Helpers;
@@ -31,7 +32,8 @@ namespace Glow.PrettyFOMOD
 
         private static void DoGenerateFull(PrettyFomodConfig config)
         {
-            FomodInfoCreator.CreateInfoFile(config);
+            var fomodCreator = new FomodCreator(config);
+            fomodCreator.Run();
         }
         
         private static void DoSmartConditions(PrettyFomodConfig config)
@@ -44,8 +46,8 @@ namespace Glow.PrettyFOMOD
             }
             
             var moduleConfiguration = FomodFileIo.OpenFomodFile(fomodPath);
-            var cache = FomodXmlUtils.GenerateFomodDestinationEspCache(moduleConfiguration);
-            var pluginNodes = FomodXmlUtils.GetPluginNodes(moduleConfiguration);
+            var cache = FomodUtils.GenerateFomodDestinationEspCache(moduleConfiguration);
+            var pluginNodes = FomodUtils.GetPluginNodes(moduleConfiguration);
             foreach (var pluginNode in pluginNodes)
             {
                 ProcessPlugin(pluginNode, fomodPath, cache);
@@ -74,13 +76,13 @@ namespace Glow.PrettyFOMOD
             foreach (var fileList in fileNodes)
             {
                 if (!fileList.FileSpecified) return;
-                espPaths.AddRange(fileList.File.Select(fileSystemItem => fileSystemItem.Source).Where(IsPluginFileName));
+                espPaths.AddRange(fileList.File.Select(fileSystemItem => fileSystemItem.Source).Where(FomodUtils.IsPluginFileName));
             }
 
             List<string> masters = [];
             foreach (var espPath in espPaths.Select(sourcePath => fomodPath.Replace("fomod", sourcePath)))
             {
-                masters.AddRange(GetMasters(espPath));
+                masters.AddRange(FomodUtils.GetMasters(espPath));
             }
 
             if (masters.Count < 2)
@@ -96,82 +98,11 @@ namespace Glow.PrettyFOMOD
                       </typeDescriptor>
                  we want to remove the <type /> element and replace with our generated condition node.
              */
-            var typeDescriptorNode = FomodXmlUtils.ResetTypeDescriptorForPluginNode(plugin);
-            var conditionNode = GenerateRecommendedConditionNodeForMasters(masters, destinationCache);
+            var typeDescriptorNode = FomodUtils.ResetTypeDescriptorForPluginNode(plugin);
+            var conditionNode = FomodUtils.GenerateRecommendedConditionNodeForMasters(masters, destinationCache);
             Console.WriteLine("Adding recommendations to XML");
             typeDescriptorNode.DependencyType = conditionNode;
         }
-
-        // ReSharper disable once SuggestBaseTypeForParameter
-        private static DependencyPluginType GenerateRecommendedConditionNodeForMasters(List<string> masters, HashSet<string> destinationCache)
-        {
-            /* Create a node within `plugin.typeDescriptor` marking something as Recommended if masters are present
-             Example here:
-                <typeDescriptor> 
-                    <dependencyType> 
-                        <defaultType name="Optional"/> 
-                        <patterns> 
-                            <pattern> 
-                                <dependencies operator="And"> 
-                                    <fileDependency file="Amber Guard.esp" state="Active"/> 
-                                </dependencies> 
-                                <type name="Recommended"/> 
-                            </pattern> 
-                        </patterns> 
-                    </dependencyType> 
-                </typeDescriptor> 
-                
-                In past FOMODs I've created a separate condition to disable the checkbox if the plugin is missing,
-                but this seems overly restrictive and not really useful to anyone. 
-             */
-            
-            
-            // Working from the inside, out. Create a dependencies node with fileDependency children
-            var compositeDependency = new CompositeDependency
-            {
-                Operator = CompositeDependencyOperator.And
-            };
-
-            foreach (var master in masters)
-            {
-                if (destinationCache.Contains(master))
-                {
-                    continue;
-                }
-                
-                var fileDependency = new FileDependency() { File = master, State = FileDependencyState.Active };
-                compositeDependency.FileDependency.Add(fileDependency);
-            }
-            
-            // create pattern. this stuff is all kinda hard to memorize and follow. maybe refactor some of the nonsense out
-            var pattern = new DependencyPattern()
-            {
-                Dependencies = compositeDependency,
-                Type = new PluginType() { Name = PluginTypeEnum.Recommended }
-            };
-            
-            var dependencyPluginType = new DependencyPluginType()
-            {
-                Patterns = { pattern },
-                DefaultType = new PluginType() { Name = PluginTypeEnum.Optional }
-            };
-            
-            return dependencyPluginType;
-        }
-
-        #region Plugin FomodFileIO Parsing
-        private static List<string> GetMasters(string espPath)
-        {
-            using var mod = SkyrimMod.CreateFromBinaryOverlay(espPath, SkyrimRelease.SkyrimSE);
-            var allMasters = mod.ModHeader.MasterReferences
-                .Select(masterReference => masterReference.Master.FileName)
-                .Select(dummy => (string)dummy)
-                .ToList();
-            allMasters.RemoveAll(m => ExcludedMasters.Contains(m));
-            return allMasters;
-        }
-
-        #endregion
 
         #region CLI arguments
 
@@ -205,30 +136,6 @@ namespace Glow.PrettyFOMOD
             var filePath = Path.Combine(fomodPath, Constants.Filenames.DummyModuleFile);
             Console.WriteLine($"Deleting dummy file at path {filePath}");
             File.Delete(filePath);
-        }
-
-        #endregion
-
-        #region Constants
-
-        // No need to add these to FOMOD conditions. They're expected to be there.
-        private static readonly List<string> ExcludedMasters = new List<string>()
-            .Append("Skyrim.esm")
-            .Append("Update.esm")
-            .Append("HearthFires.esm")
-            .Append("Dragonborn.esm")
-            .Append("Dawnguard.esm")
-            .ToList();
-
-        #endregion
-
-        #region Helper Fns
-
-        private static bool IsPluginFileName(string fileName)
-        {
-            return fileName.Contains(".esp")
-                   || fileName.Contains(".esl")
-                   || fileName.Contains(".esm");
         }
 
         #endregion

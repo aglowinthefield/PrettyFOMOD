@@ -134,6 +134,6 @@ _NCrunch*
 
 .idea/
 
-PrettyFOMOD/test/fomod/ModuleConfigBackup*
-PrettyFOMOD/test/fomod/ModuleDummy.xml
-PrettyFOMOD/test/ff/*
+Glow.PrettyFOMOD/test/fomod/*
+Glow.PrettyFOMOD/test/ff/*
+Glow.PrettyFOMOD/test/generator/*

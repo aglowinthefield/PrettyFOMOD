@@ -18,5 +18,14 @@ public static class Constants
                 .Replace(":", "-"); 
             return $"ModuleConfigBackup-{date}.xml";
         }
+        
     }
+    public static readonly string[] ExcludedMasters =
+    [
+        "Skyrim.esm",
+        "Update.esm",
+        "HearthFires.esm",
+        "Dragonborn.esm",
+        "Dawnguard.esm"
+    ];
 }

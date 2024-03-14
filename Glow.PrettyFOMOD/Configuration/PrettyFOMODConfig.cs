@@ -2,7 +2,8 @@
 
 public class PrettyFomodConfig
 {
-    public bool Test { get; set;  }
+    public bool Test { get; set; }
+    public bool UseDummyFileNames { get; set; }
     public bool SmartConditions { get; set;  }
     public bool GenerateFull { get; set; }
 
@@ -10,8 +11,9 @@ public class PrettyFomodConfig
     {
         return $"[\n\t" +
                $"Test = {Test}" +
-               $"Generate Full = {GenerateFull}" +
-               $"Generate Smart Conditions = {SmartConditions}" +
+               $"\n\tUse Dummy Filenames = {UseDummyFileNames}" +
+               $"\n\tGenerate Full = {GenerateFull}" +
+               $"\n\tGenerate Smart Conditions = {SmartConditions}" +
                $"\n]";
     }
 }

@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <Folder Include="test\fomod\" />
+      <Folder Include="test\generator\" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1183,7 +1183,7 @@ namespace Glow.PrettyFOMOD
             {
                 return _plugin;
             }
-            private set
+            set
             {
                 _plugin = value;
             }
