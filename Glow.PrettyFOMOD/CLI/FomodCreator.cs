@@ -12,16 +12,19 @@ public class FomodCreator(PrettyFomodConfig config)
 
     public void Run()
     {
+        
         FomodFileIo.SetupEmptyFomodDirectory(config);
         
         // Create info later
-        FomodInfoCreator.CreateInfoFile(config);
+        CreateInfoFile(config);
         
         CreateSkeletonConfiguration();
 
-        // If any esps in this base folder.
+        // If any ESPs in this base folder.
         // TODO: Do recursive scan later.
         if (!HasEspInFolder(_cwd)) return;
+        
+        // Generate cache of possibly installed masters from these sources to avoid the blocked master problem.
         
         // create install step for this folder
         AddInstallStep(new InstallStep()
@@ -40,10 +43,9 @@ public class FomodCreator(PrettyFomodConfig config)
         _configuration.ModuleImage = new HeaderImage() { Path = "" };
     }
 
-    private ModuleConfiguration AddInstallStep(InstallStep installStep)
+    private void AddInstallStep(InstallStep installStep)
     {
         _configuration.InstallSteps.InstallStep.Add(installStep);
-        return _configuration;
     }
 
     public void Save()
@@ -129,5 +131,19 @@ public class FomodCreator(PrettyFomodConfig config)
         // TODO: This for now just returns the filename without an extension. Smartly decoupling it from, say, master names could be interesting. 
         return patchName;
     }
-    
+
+    private static void CreateInfoFile(PrettyFomodConfig config)
+    {
+        CliUtils.WriteHeaderText("Generating info.xml. This is just metadata for your mod.");
+        
+        var fomodInfo = FomodFileIo.OpenFomodInfoFile(config);
+        fomodInfo.Name = ReadLine.Read("Mod Name: ", fomodInfo.Name);
+        fomodInfo.Author = ReadLine.Read("Author: ", fomodInfo.Author);
+        fomodInfo.Description = ReadLine.Read("Description: ", fomodInfo.Description);
+        fomodInfo.Website = ReadLine.Read("Website: ", fomodInfo.Website);
+        fomodInfo.Version = ReadLine.Read("Version: ", fomodInfo.Version);
+        
+        // TODO: Figure out groups.
+        FomodFileIo.SaveFomodInfo(fomodInfo, config);
+    }
 }

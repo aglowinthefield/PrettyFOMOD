@@ -133,8 +133,8 @@ public static class FomodUtils
     
     public static bool IsPluginFileName(string fileName)
     {
-        return _pluginExtensions.Contains(Path.GetExtension(fileName));
+        return PluginExtensions.Contains(Path.GetExtension(fileName));
     }
 
-    private static string[] _pluginExtensions = [".esm", ".esl", ".esp"];
+    private static readonly string[] PluginExtensions = [".esm", ".esl", ".esp"];
 }

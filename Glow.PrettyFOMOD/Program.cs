@@ -12,12 +12,12 @@ namespace Glow.PrettyFOMOD
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Warmup.Init();
-            
-            var config = GetConfig(args);
-            Console.WriteLine("Arguments parsed: " + config);
+
+            var config = CliUtils.ConfigFromCli();
+            // Console.WriteLine("Arguments parsed: " + config);
 
             switch (config.GenerateFull)
             {
@@ -103,32 +103,7 @@ namespace Glow.PrettyFOMOD
             Console.WriteLine("Adding recommendations to XML");
             typeDescriptorNode.DependencyType = conditionNode;
         }
-
-        #region CLI arguments
-
-        private static PrettyFomodConfig GetConfig(string[] args)
-        {
-            var config = new PrettyFomodConfig();
-            if (args.Length < 1)
-            {
-                return config;
-            }
-
-            if (args.Any(a => a.Equals("-test")))
-            {
-                config.Test = true;
-            }
-
-            if (args.Any(a => a.ToLower().Equals("-generatefull")))
-            {
-                config.GenerateFull = true;
-                config.SmartConditions = false;
-            }
-            return config;
-        }
-
-        #endregion
-
+        
         #region FomodFileIO I/O
         
         private static void RemoveTestDocument(string fomodPath)

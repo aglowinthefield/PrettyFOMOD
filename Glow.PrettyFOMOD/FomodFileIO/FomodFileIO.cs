@@ -55,9 +55,9 @@ public static class FomodFileIo
         {
             doc.Load(path);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Console.WriteLine("Error parsing FOMOD info file. Starting from scratch.");
+            Console.WriteLine("No FOMOD info file found or invalid format. Starting from scratch.\n");
             return new FomodInfo();
         }
 
