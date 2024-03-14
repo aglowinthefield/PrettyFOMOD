@@ -2,6 +2,7 @@
 using Figgle;
 using Glow.PrettyFOMOD.Configuration;
 using Sharprompt;
+using Spectre.Console;
 
 namespace Glow.PrettyFOMOD.CLI;
 
@@ -44,6 +45,11 @@ public static class CliUtils
         throw new InvalidProgramException();
 
     }
+
+    public static void WriteStepwiseText(string text)
+    {
+        AnsiConsole.MarkupLineInterpolated($"[bold]{text}[/]");
+    }
     
     public static void WriteWarningText(string text)
     {
@@ -66,6 +72,21 @@ public static class CliUtils
             Console.ResetColor();
         }
         Console.WriteLine();
+    }
+
+    public static void ConfirmExit(bool happy = true)
+    {
+        AnsiConsole.MarkupLine(happy
+            ? ":cherry_blossom: Process completed! Press any key to exit~"
+            : ":confounded_face: Press any key to exit.");
+        Console.ReadLine();
+    }
+
+    public static void WriteException(Exception e)
+    {
+        AnsiConsole.MarkupLine("[bold red]An exception occured :([/]");
+        AnsiConsole.WriteException(e);
+        ConfirmExit(happy: false);
     }
 }
      

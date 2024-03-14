@@ -8,7 +8,9 @@ namespace Glow.PrettyFOMOD.CLI;
 public class FomodCreator(PrettyFomodConfig config)
 {
     private readonly ModuleConfiguration _configuration = new();
-    private readonly string _cwd = (config.Test) ? Path.Combine(FomodFileIo.GetCwdPath(), @"test\generator") : FomodFileIo.GetCwdPath();
+    private readonly string _cwd = (config.Test)
+        ? Path.Combine(FomodFileIo.GetCwdPath(config), @"test\generator")
+        : FomodFileIo.GetCwdPath(config);
 
     public void Run()
     {
@@ -17,6 +19,7 @@ public class FomodCreator(PrettyFomodConfig config)
         
         // Create info later
         CreateInfoFile(config);
+        CliUtils.WriteStepwiseText($"Using current working directory: {_cwd}");
         
         CreateSkeletonConfiguration();
 

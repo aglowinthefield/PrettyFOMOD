@@ -28,12 +28,20 @@ namespace Glow.PrettyFOMOD
                     DoGenerateFull(config);
                     break;
             }
+            CliUtils.ConfirmExit();
         }
 
         private static void DoGenerateFull(PrettyFomodConfig config)
         {
             var fomodCreator = new FomodCreator(config);
-            fomodCreator.Run();
+            try
+            {
+                fomodCreator.Run();
+            }
+            catch (Exception e)
+            {
+                CliUtils.WriteException(e);
+            }
         }
         
         private static void DoSmartConditions(PrettyFomodConfig config)

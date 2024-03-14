@@ -11,7 +11,9 @@ public static class FomodFileIo
     public static string GetFomodPath(PrettyFomodConfig config)
     {
         // For ease of testing in an IDE, I nest resources in the CWD/test folder. Set your run arg to -test if debugging 
-        var filePath = config.Test ? Path.Combine(GetCwdPath()!, @"test\fomod") : Path.Combine(GetCwdPath()!, "fomod");
+        var filePath = config.Test
+            ? Path.Combine(GetCwdPath(config), @"test\fomod")
+            : Path.Combine(GetCwdPath(config), "fomod");
         
         if (config is { GenerateFull: true, Test: true })
         {
@@ -34,19 +36,20 @@ public static class FomodFileIo
     
     public static void SetupEmptyFomodDirectory(PrettyFomodConfig config)
     {
-        Directory.CreateDirectory(config.Test
-            ? Path.Combine(GetCwdPath()!, @"test\generator\fomod")
-            : Path.Combine(GetCwdPath()!, "fomod"));
+        var directory = config.Test
+                                    ? Path.Combine(GetCwdPath(config), @"test\generator\fomod")
+                                    : Path.Combine(GetCwdPath(config), "fomod");
+        CliUtils.WriteStepwiseText($"Creating FOMOD directory in path: {directory}");
+        Directory.CreateDirectory(directory);
     }
 
     public static FomodInfo OpenFomodInfoFile(PrettyFomodConfig config)
     {
-        var filename = config.Test ? Constants.Filenames.DummyInfoFile : Constants.Filenames.InfoFile;
+        var filename = config.UseDummyFileNames ? Constants.Filenames.DummyInfoFile : Constants.Filenames.InfoFile;
         var path = Path.Combine(GetFomodPath(config), filename);
 
         if (!File.Exists(path))
         {
-            File.Create(path);
             return new FomodInfo();
         }
         
@@ -57,7 +60,7 @@ public static class FomodFileIo
         }
         catch (Exception)
         {
-            Console.WriteLine("No FOMOD info file found or invalid format. Starting from scratch.\n");
+            CliUtils.WriteStepwiseText("No FOMOD info file found or invalid format. Starting from scratch.\n");
             return new FomodInfo();
         }
 
@@ -75,14 +78,13 @@ public static class FomodFileIo
             Constants.Filenames.ModuleFile,
             Constants.Filenames.BackupFileName());
         
-        Console.WriteLine($"Backing up {Constants.Filenames.ModuleFile} to " + backupPath);
+        CliUtils.WriteStepwiseText($"Backing up {Constants.Filenames.ModuleFile} to " + backupPath);
         File.Copy(fomodFilePath, backupPath, false);
     }
     
     public static void SaveFomod(ModuleConfiguration moduleConfiguration, PrettyFomodConfig config)
     {
         CliUtils.PrintSeparator();
-        Console.WriteLine("Saving FOMOD. Here goes nothin'!");
 
         var fomodPath = GetFomodPath(config);
 
@@ -91,6 +93,7 @@ public static class FomodFileIo
             : Path.Combine(fomodPath, Constants.Filenames.ModuleFile);
         
         // TODO: Dunno if this is totally wise.
+        CliUtils.WriteStepwiseText($"Deleting existing FOMOD (it's backed up) at path: {filePath}.");
         File.Delete(filePath);
         
         var serializer = new XmlSerializer(typeof(ModuleConfiguration));
@@ -99,7 +102,7 @@ public static class FomodFileIo
             serializer.Serialize(writer, moduleConfiguration);
         }
         
-        Console.WriteLine($"FOMOD saved to {filePath}");
+        CliUtils.WriteStepwiseText($"FOMOD saved to {filePath}");
     }
 
     // private static void SaveFile<T>(T file, PrettyFomodConfig config)
@@ -126,10 +129,10 @@ public static class FomodFileIo
             : Path.Combine(fomodPath, Constants.Filenames.InfoFile);
         
         // TODO: Dunno if this is totally wise.
-        File.Delete(filePath);
+        // File.Delete(filePath);
         
         var serializer = new XmlSerializer(typeof(FomodInfo));
-        using (var writer = new StreamWriter(filePath))
+        using (var writer = new StreamWriter(filePath, append: false))
         {
             serializer.Serialize(writer, fomodInfo);
         }
@@ -137,8 +140,11 @@ public static class FomodFileIo
         Console.WriteLine($"FOMOD Info saved to {filePath}");
     }
     
-    public static string GetCwdPath()
+    public static string GetCwdPath(PrettyFomodConfig config)
     {
-        return Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!;
+        var cwdPath = config.Test
+            ? Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!
+            : Directory.GetCurrentDirectory();
+        return cwdPath;
     }
 }
