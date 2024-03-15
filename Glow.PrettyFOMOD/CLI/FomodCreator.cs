@@ -155,7 +155,7 @@ public class FomodCreator(PrettyFomodConfig config)
                         new FileSystemItem()
                         {
                             Source = relativeEspPath,
-                            Destination = FomodUtils.GetEspFilenameFromPath(espPath)
+                            Destination = "", // No reason to have any specific destinations. Plugins resolve to data/
                         }
                     }
                 }
