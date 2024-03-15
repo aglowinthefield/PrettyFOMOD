@@ -103,6 +103,41 @@ public class FomodCreator(PrettyFomodConfig config)
         return groupList;
     }
 
+    /*
+     * Smart Organization is a heuristic-based feature to group all ESPs, regardless of where they're located in the
+     * folder structure, by things like name or common masters. This is an experimental feature that might blow up the
+     * scope of this utility but worth documenting so I don't forget.
+     *
+     * Another option would be to somehow look up the ESP category using the Nexus API to create groups that way.
+     *
+     * A third option would be to just give the user control over how things are organized, but again that would certainly
+     * blow up the scope of this tool and make me liable for some pretty sh*tty looking FOMODs lol. Doing this via an expressive
+     * declared folder structure would probably be a reasonable compromise between manual organization and time-saving.
+     */
+    private void DoSmartOrganization()
+    {
+        
+    }
+    
+    /*
+     * FOMODs will be divided according to the folder hierarchy provided in the CWD
+     *
+     * Base directory
+     * |---- [...ESP files]               == 'General' step, group, plugins
+     * |---- subDirectory/                == create step for subdirectory
+     * |-------- [...ESP files]           == create plugins for step w/ generic groups
+     * |-------- subDirectory/            == create group for step
+     * |------------ [...ESP files]       == create plugin for group
+     * |------------ subDirectory/        == ???
+     *
+     * TODO: Come up with a way to make sure we aren't using folders like 'textures/' and 'meshes/' as steps. Generally,
+     * this project needs some wisdom around how to handle asset organization via FOMOD. Look for some good examples somewhere.
+     */
+    
+    private void ParseForDirectory(string dirPath, int directoryLevel)
+    {
+    }
+    
     private Plugin CreatePluginFromEspPath(string espPath, HashSet<string> fomodMasterCache)
     {
         

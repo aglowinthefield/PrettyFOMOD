@@ -34,7 +34,10 @@ public static class CliUtils
         config.Test              = Prompt.Confirm(testPrompt, defaultValue: false);
         config.UseDummyFileNames = Prompt.Confirm(dummyPrompt, defaultValue: false);
         config.GenerateFull      = Prompt.Confirm(generateFullPrompt, defaultValue: true);
-        config.SmartConditions   = Prompt.Confirm(smartConditionPrompt, defaultValue: false);
+        if (!config.GenerateFull)
+        {
+            config.SmartConditions   = Prompt.Confirm(smartConditionPrompt, defaultValue: false);
+        }
 
         if (config is not { GenerateFull: true, SmartConditions: true }) return config;
         

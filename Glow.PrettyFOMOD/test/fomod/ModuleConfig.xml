@@ -1,20 +1,30 @@
-<!-- Created with FOMOD Creation Tool 1.7.0.37 [http://www.nexusmods.com/fallout4/mods/6821] -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
-  <moduleName>
-  </moduleName>
-  <installSteps order="Explicit">
-    <installStep name="Step1">
+<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <moduleName colour="000000"></moduleName>
+  <moduleImage path="" />
+  <installSteps>
+    <installStep name="General">
       <optionalFileGroups order="Explicit">
-        <group name="test" type="SelectExactlyOne">
+        <group name="General" type="SelectAny">
           <plugins order="Explicit">
-            <plugin name="northern roads - natural waterfalls">
-              <description>
-              </description>
+            <plugin name="aglow_Natural Waterfalls - Northern Roads Patch">
+              <description />
               <files>
-                <file source="aglow_Natural Waterfalls - Northern Roads Patch.esp" destination="aglow_Natural Waterfalls - Northern Roads Patch.esp" priority="0" />
-                <file source="textures/something/else/test.dds" destination="textures/something/else/test.dds" priority="0" />
+                <file source="D:\var\PrettyFOMOD\Glow.PrettyFOMOD\test\aglow_Natural Waterfalls - Northern Roads Patch.esp" destination="aglow_Natural Waterfalls - Northern Roads Patch.esp" />
               </files>
               <typeDescriptor>
+                <dependencyType>
+                  <defaultType name="Optional" />
+                  <patterns>
+                    <pattern>
+                      <dependencies>
+                        <fileDependency file="Natural Waterfalls.esp" state="Active" />
+                        <fileDependency file="Northern Roads.esp" state="Active" />
+                      </dependencies>
+                      <type name="Recommended" />
+                    </pattern>
+                  </patterns>
+                </dependencyType>
                 <type name="Optional" />
               </typeDescriptor>
             </plugin>

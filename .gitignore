@@ -134,6 +134,4 @@ _NCrunch*
 
 .idea/
 
-Glow.PrettyFOMOD/test/fomod/*
-Glow.PrettyFOMOD/test/ff/*
-Glow.PrettyFOMOD/test/generator/*
+Glow.PrettyFOMOD/test/*
