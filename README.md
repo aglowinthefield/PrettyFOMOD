@@ -1,5 +1,8 @@
 ﻿# This is a work in progress. Without a GitHub release available, clone at your own peril.
-![prettyFOMOD image](./img.png)
+
+## Requires .NET Desktop Runtime 8.x, available [here](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+
+<img src="./img.png" width="400"  alt="img"/>
 
 ## Who is PrettyFOMOD for?
 Mod creators and patch collection authors.
