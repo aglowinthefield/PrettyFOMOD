@@ -104,6 +104,8 @@ public class FomodCreator(PrettyFomodConfig config)
 
     private Plugin CreatePluginFromEspPath(string espPath, HashSet<string> fomodMasterCache)
     {
+        
+        var relativeEspPath = Path.GetRelativePath(_cwd, espPath);
         var masters = FomodUtils.GetMasters(espPath);
         return new Plugin()
         {
@@ -116,7 +118,7 @@ public class FomodCreator(PrettyFomodConfig config)
                     {
                         new FileSystemItem()
                         {
-                            Source = espPath,
+                            Source = relativeEspPath,
                             Destination = FomodUtils.GetEspFilenameFromPath(espPath)
                         }
                     }
