@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Figgle;
 using Glow.PrettyFOMOD.Configuration;
 using Sharprompt;
 using Spectre.Console;
@@ -20,8 +19,7 @@ public static class CliUtils
         var config = new PrettyFomodConfig();
         
         Console.OutputEncoding = Encoding.UTF8;
-        Console.WriteLine(
-            FiggleFonts.FlowerPower.Render("PrettyFOMOD"));
+        AnsiConsole.Write(new FigletText("PrettyFOMOD").LeftJustified().Color(Color.MediumOrchid3));
         
         WriteWarningText("PLEASE NOTE: This tool is intended to be as non-destructive as possible.\n" +
                          "That said, it is currently in very early stages of development.\nIf you are working with " +

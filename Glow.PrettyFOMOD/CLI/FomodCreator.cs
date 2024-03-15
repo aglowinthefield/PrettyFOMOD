@@ -2,6 +2,7 @@
 using Glow.PrettyFOMOD.Configuration;
 using Glow.PrettyFOMOD.FomodFileIO;
 using Glow.PrettyFOMOD.Helpers;
+using Sharprompt;
 
 namespace Glow.PrettyFOMOD.CLI;
 
@@ -153,11 +154,11 @@ public class FomodCreator(PrettyFomodConfig config)
         CliUtils.WriteHeaderText("Generating info.xml. This is just metadata for your mod.");
         
         var fomodInfo = FomodFileIo.OpenFomodInfoFile(config);
-        fomodInfo.Name = ReadLine.Read("Mod Name: ", fomodInfo.Name);
-        fomodInfo.Author = ReadLine.Read("Author: ", fomodInfo.Author);
-        fomodInfo.Description = ReadLine.Read("Description: ", fomodInfo.Description);
-        fomodInfo.Website = ReadLine.Read("Website: ", fomodInfo.Website);
-        fomodInfo.Version = ReadLine.Read("Version: ", fomodInfo.Version);
+        fomodInfo.Name =        Prompt.Input<string>("Mod Name: ", defaultValue: fomodInfo.Name);
+        fomodInfo.Author =      Prompt.Input<string>("Author: ", defaultValue: fomodInfo.Author);
+        fomodInfo.Description = Prompt.Input<string>("Description: ", defaultValue: fomodInfo.Description);
+        fomodInfo.Website =     Prompt.Input<string>("Website: ", defaultValue: fomodInfo.Website);
+        fomodInfo.Version =     Prompt.Input<string>("Version: ", defaultValue: fomodInfo.Version);
         
         // TODO: Figure out groups.
         FomodFileIo.SaveFomodInfo(fomodInfo, config);
