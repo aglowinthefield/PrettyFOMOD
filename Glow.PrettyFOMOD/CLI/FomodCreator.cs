@@ -23,11 +23,8 @@ public class FomodCreator(PrettyFomodConfig config)
         
         CreateSkeletonConfiguration(fomodInfo);
 
-        // If any ESPs in this base folder.
         // TODO: Do recursive scan later.
         if (!HasEspInFolder(_cwd)) return;
-        
-        // Generate cache of possibly installed masters from these sources to avoid the blocked master problem.
         
         // create install step for this folder
         AddInstallStep(new InstallStep()
@@ -51,11 +48,6 @@ public class FomodCreator(PrettyFomodConfig config)
         _configuration.InstallSteps.InstallStep.Add(installStep);
     }
 
-    public void Save()
-    {
-        FomodFileIo.SaveFomod(_configuration, config);
-    }
-
     private static bool HasEspInFolder(string path)
     {
         var files = Directory.GetFiles(path);
@@ -65,9 +57,6 @@ public class FomodCreator(PrettyFomodConfig config)
 
     private GroupList CreateGroupsFromBaseDirectory()
     {
-        // this is where we might want to group by common master or some similar heuristic
-        
-        
         // Gather all ESPs
         var espPaths = Directory.GetFiles(_cwd).Where(FomodUtils.IsPluginFileName);
         
