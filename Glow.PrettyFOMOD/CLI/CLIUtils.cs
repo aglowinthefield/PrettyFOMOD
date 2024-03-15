@@ -25,6 +25,8 @@ public static class CliUtils
                          "That said, it is currently in very early stages of development.\nIf you are working with " +
                          "an active FOMOD in this folder, it will be backed up, but if you want to be extra cautious, " +
                          "make a backup first then run this program again.");
+        
+        // TODO: Folder select goes here. Set `cwd` based on this.
 
         const string testPrompt = "Run in test mode? (You probably don't want this unless you're working in an IDE";
         const string dummyPrompt = "Use dummy file names? (Useful for verification, won't work in mod organizers)";
@@ -45,6 +47,12 @@ public static class CliUtils
                          "\n Generating a full one does not. Select one or the other please.");
         throw new InvalidProgramException();
 
+    }
+
+    private static string GetFolderPath()
+    {
+        // FolderBrowserDialogue 
+        return "";
     }
 
     public static void WriteStepwiseText(string text)

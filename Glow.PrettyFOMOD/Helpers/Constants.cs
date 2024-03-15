@@ -26,6 +26,10 @@ public static class Constants
         "Update.esm",
         "HearthFires.esm",
         "Dragonborn.esm",
-        "Dawnguard.esm"
+        "Dawnguard.esm",
+        "ccBGSSSE001-Fish.esm",
+        "ccQDRSSE001-SurvivalMode.esl",
+        "ccBGSSSE037-Curios.esl",
+        "ccBGSSSE025-AdvDSGS.esm",
     ];
 }

@@ -18,11 +18,10 @@ public class FomodCreator(PrettyFomodConfig config)
         
         FomodFileIo.SetupEmptyFomodDirectory(config);
         
-        // Create info later
-        CreateInfoFile(config);
+        var fomodInfo = CreateInfoFile(config);
         CliUtils.WriteStepwiseText($"Using current working directory: {_cwd}");
         
-        CreateSkeletonConfiguration();
+        CreateSkeletonConfiguration(fomodInfo);
 
         // If any ESPs in this base folder.
         // TODO: Do recursive scan later.
@@ -40,9 +39,9 @@ public class FomodCreator(PrettyFomodConfig config)
         FomodFileIo.SaveFomod(_configuration, config);
     }
 
-    private void CreateSkeletonConfiguration()
+    private void CreateSkeletonConfiguration(FomodInfo fomodInfo)
     {
-        _configuration.ModuleName = new ModuleTitle { Value = "" };
+        _configuration.ModuleName = new ModuleTitle { Value = fomodInfo.Name };
         _configuration.InstallSteps = new StepList();
         _configuration.ModuleImage = new HeaderImage() { Path = "" };
     }
@@ -184,7 +183,7 @@ public class FomodCreator(PrettyFomodConfig config)
         return patchName;
     }
 
-    private static void CreateInfoFile(PrettyFomodConfig config)
+    private static FomodInfo CreateInfoFile(PrettyFomodConfig config)
     {
         CliUtils.WriteHeaderText("Generating info.xml. This is just metadata for your mod.");
         
@@ -197,5 +196,6 @@ public class FomodCreator(PrettyFomodConfig config)
         
         // TODO: Figure out groups.
         FomodFileIo.SaveFomodInfo(fomodInfo, config);
+        return fomodInfo;
     }
 }

@@ -12,6 +12,7 @@ namespace Glow.PrettyFOMOD
 {
     class Program
     {
+        [STAThread]
         static void Main()
         {
             Warmup.Init();
