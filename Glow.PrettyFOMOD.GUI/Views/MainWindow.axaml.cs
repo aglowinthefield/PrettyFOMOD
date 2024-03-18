@@ -11,20 +11,4 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
     }
-
-    private void Button_OnClick(object? sender, RoutedEventArgs e)
-    {
-        var storage = this.StorageProvider;
-        var options = new FolderPickerOpenOptions() { Title = "Select mod folder", AllowMultiple = false };
-        var folderResult = storage.OpenFolderPickerAsync(options);
-
-        if (folderResult.Result.Count < 1)
-        {
-            return;
-        }
-
-        var selectedFolder = folderResult.Result.ElementAt(0);
-
-        // throw new System.NotImplementedException();
-    }
 }

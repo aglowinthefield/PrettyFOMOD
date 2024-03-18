@@ -1,7 +1,16 @@
-﻿namespace Glow.PrettyFOMOD.Configuration;
+﻿using ReactiveUI;
 
-public class PrettyFomodConfig
+namespace Glow.PrettyFOMOD.Configuration;
+
+public class PrettyFomodConfig : ReactiveObject
 {
+    private string? _modDirectory = "";
+    public string? ModDirectory
+    {
+        get => _modDirectory;
+        set => this.RaiseAndSetIfChanged(ref _modDirectory, value);
+    }
+    
     public bool Test { get; set; }
     public bool UseDummyFileNames { get; set; }
     public bool SmartConditions { get; set;  }
@@ -9,8 +18,9 @@ public class PrettyFomodConfig
 
     public override string ToString()
     {
-        return $"[\n\t" +
-               $"Test = {Test}" +
+        return $"[" +
+               $"\n\tWorking Directory = {ModDirectory}" +
+               $"\n\tTest = {Test}" +
                $"\n\tUse Dummy Filenames = {UseDummyFileNames}" +
                $"\n\tGenerate Full = {GenerateFull}" +
                $"\n\tGenerate Smart Conditions = {SmartConditions}" +

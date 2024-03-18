@@ -1,24 +1,24 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Glow.PrettyFOMOD.GUI.ViewModels"
+        xmlns:v="using:Glow.PrettyFOMOD.GUI.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="350"
         x:Class="Glow.PrettyFOMOD.GUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Glow.PrettyFOMOD.GUI">
+        RequestedThemeVariant="Light"
+        Icon="/Assets/flower.ico"
+        Title="PrettyFOMOD">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
+    
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button Click="Button_OnClick" Name="FolderSelect" HorizontalAlignment="Center">Select Mod Folder</Button>
-        <TextBlock Text="{Binding SelectedFolder}"></TextBlock>
+        <v:FolderSelectView DataContext="{Binding FolderSelectViewModel}" />
     </StackPanel>
 
 </Window>
