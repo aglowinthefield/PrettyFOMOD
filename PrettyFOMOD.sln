@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glow.PrettyFOMOD", "Glow.PrettyFOMOD\Glow.PrettyFOMOD.csproj", "{C6E4A6CC-1F02-4735-8230-84BDFC7EA25B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glow.PrettyFOMOD.GUI", "Glow.PrettyFOMOD.GUI\Glow.PrettyFOMOD.GUI.csproj", "{724AFBB4-DCB5-412D-8754-09B09C1DEC9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glow.PrettyFOMOD.GUI", "Glow.PrettyFOMOD.GUI\Glow.PrettyFOMOD.GUI.csproj", "{0645CBD4-A8AD-4332-B67E-92184FA67495}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,9 +14,9 @@ Global
 		{C6E4A6CC-1F02-4735-8230-84BDFC7EA25B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6E4A6CC-1F02-4735-8230-84BDFC7EA25B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E4A6CC-1F02-4735-8230-84BDFC7EA25B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{724AFBB4-DCB5-412D-8754-09B09C1DEC9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{724AFBB4-DCB5-412D-8754-09B09C1DEC9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{724AFBB4-DCB5-412D-8754-09B09C1DEC9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{724AFBB4-DCB5-412D-8754-09B09C1DEC9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0645CBD4-A8AD-4332-B67E-92184FA67495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0645CBD4-A8AD-4332-B67E-92184FA67495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0645CBD4-A8AD-4332-B67E-92184FA67495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0645CBD4-A8AD-4332-B67E-92184FA67495}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
