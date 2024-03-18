@@ -6,16 +6,15 @@
     xmlns:vm="using:Glow.PrettyFOMOD.GUI.ViewModels"
     x:DataType="vm:FolderSelectViewModel"
     mc:Ignorable="d"
-    d:DesignWidth="500"
+    d:DesignWidth="600"
     d:DesignHeight="250"
 >
     <Design.DataContext>
         <vm:FolderSelectViewModel />
     </Design.DataContext>
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" />
-        <TextBlock Text="Dummy" HorizontalAlignment="Center"></TextBlock>
-        <Button Name="FolderSelectButton" HorizontalAlignment="Center" Margin="0, 20">Select Mod Folder</Button>
-        <TextBlock Text="{Binding SelectedFolder}"></TextBlock>
+        <TextBlock FontSize="18" Text="{Binding Greeting}" HorizontalAlignment="Center" />
+        <Button Click="Button_OnClick" HorizontalAlignment="Center" Margin="0, 20, 0, 0">Select Mod Folder</Button>
+        <TextBlock Text="{Binding SelectedFolder}" />
     </StackPanel>
 </UserControl>

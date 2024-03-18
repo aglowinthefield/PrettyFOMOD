@@ -9,6 +9,7 @@
         x:DataType="vm:MainWindowViewModel"
         RequestedThemeVariant="Light"
         Icon="/Assets/flower.ico"
+        Background="MistyRose"
         Title="PrettyFOMOD">
 
     <Design.DataContext>
