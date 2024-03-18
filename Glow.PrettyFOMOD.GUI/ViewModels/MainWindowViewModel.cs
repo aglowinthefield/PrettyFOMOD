@@ -1,8 +1,9 @@
-﻿namespace Glow.PrettyFOMOD.GUI.ViewModels;
+﻿using System.ComponentModel;
+
+namespace Glow.PrettyFOMOD.GUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-#pragma warning disable CA1822 // Mark members as static
-    public string Greeting => "Welcome to Avalonia!";
-#pragma warning restore CA1822 // Mark members as static
+    public string Greeting => "Welcome to PrettyFOMOD! Select your mod folder to continue.";
+    public string SelectedFolder => "";
 }

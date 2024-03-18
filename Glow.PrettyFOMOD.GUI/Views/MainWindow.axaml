@@ -15,6 +15,10 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Button Click="Button_OnClick" Name="FolderSelect" HorizontalAlignment="Center">Select Mod Folder</Button>
+        <TextBlock Text="{Binding SelectedFolder}"></TextBlock>
+    </StackPanel>
 
 </Window>
