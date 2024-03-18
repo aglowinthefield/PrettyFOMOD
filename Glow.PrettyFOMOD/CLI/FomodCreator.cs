@@ -13,9 +13,13 @@ public class FomodCreator(PrettyFomodConfig config)
         ? Path.Combine(FomodFileIo.GetCwdPath(config), @"test\generator")
         : FomodFileIo.GetCwdPath(config);
 
+    private List<string> _allEsps = [];                             // Full paths of every ESP in the directory
+    private List<string> _allEspFileNames = [];                     // Filename of every ESP in the directory
+    private ISkyrimModDisposableGetter[] _allMods = [];             // Mutagen representation of every ESP in the directory
+    private ISkyrimModDisposableGetter[] _consistencyPatches = [];  // Patches with 2+ masters in the same mod
+
     public void Run()
     {
-        
         FomodFileIo.SetupEmptyFomodDirectory(config);
         
         var fomodInfo = CreateInfoFile(config);
@@ -26,11 +30,16 @@ public class FomodCreator(PrettyFomodConfig config)
         // TODO: Do recursive scan later.
         if (!HasEspInFolder(_cwd)) return;
         
+        // Gather all ESPs and mods
+        _allEsps = Directory.GetFiles(_cwd).Where(FomodUtils.IsPluginFileName).ToList();
+        _allEspFileNames = _allEsps.Select(Path.GetFileName).ToList()!;
+        _allMods = PopulateMods();
+        
         // create install step for this folder
         AddInstallStep(new InstallStep()
         {
             Name = "General",
-            OptionalFileGroups = CreateGroupsFromBaseDirectory() 
+            OptionalFileGroups = CreateGroupsFromEspPaths(_allEsps) 
         });
         
         FomodFileIo.SaveFomod(_configuration, config);
@@ -41,6 +50,11 @@ public class FomodCreator(PrettyFomodConfig config)
         _configuration.ModuleName = new ModuleTitle { Value = fomodInfo.Name };
         _configuration.InstallSteps = new StepList();
         _configuration.ModuleImage = new HeaderImage() { Path = "" };
+    }
+
+    private ISkyrimModDisposableGetter[] PopulateMods()
+    {
+        return _allEsps.Select(path => SkyrimMod.CreateFromBinaryOverlay(path, SkyrimRelease.SkyrimSE)).ToArray();
     }
 
     private void AddInstallStep(InstallStep installStep)
@@ -55,10 +69,8 @@ public class FomodCreator(PrettyFomodConfig config)
         return hasPlugins;
     }
 
-    private GroupList CreateGroupsFromBaseDirectory()
+    private GroupList CreateGroupsFromEspPaths(IEnumerable<string> espPaths)
     {
-        // Gather all ESPs
-        var espPaths = Directory.GetFiles(_cwd).Where(FomodUtils.IsPluginFileName);
         
         // generate the cache here
         HashSet<string> fomodProvidedMasterEspCache = [];
@@ -89,6 +101,21 @@ public class FomodCreator(PrettyFomodConfig config)
             }
         };
         return groupList;
+    }
+
+    /*
+     * 
+     */
+    private ISkyrimModDisposableGetter[] GetConsistencyPatches()
+    {
+        // select mods where two or more of their masters are mods within the set
+        // i.e. lux - jks bannered mare, lux - eeks whiterun, *LUX - JK EEK BANNERED MARE*
+        return _allMods.Where(mod =>
+            mod
+                .ModHeader
+                .MasterReferences
+                .Count(master => _allEspFileNames.Contains(master.Master.FileName)) > 2)
+            .ToArray();
     }
 
     /*

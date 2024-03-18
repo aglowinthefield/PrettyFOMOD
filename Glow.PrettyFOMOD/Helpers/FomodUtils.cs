@@ -1,4 +1,5 @@
-﻿using Mutagen.Bethesda.Skyrim;
+﻿using System.IO;
+using Mutagen.Bethesda.Skyrim;
 
 namespace Glow.PrettyFOMOD.Helpers;
 
