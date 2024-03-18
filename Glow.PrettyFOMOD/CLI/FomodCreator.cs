@@ -2,6 +2,7 @@
 using Glow.PrettyFOMOD.Configuration;
 using Glow.PrettyFOMOD.FomodFileIO;
 using Glow.PrettyFOMOD.Helpers;
+using Mutagen.Bethesda.Skyrim;
 using Sharprompt;
 
 namespace Glow.PrettyFOMOD.CLI;
