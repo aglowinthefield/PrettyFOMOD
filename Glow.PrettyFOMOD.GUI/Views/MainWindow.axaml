@@ -4,12 +4,14 @@
         xmlns:v="using:Glow.PrettyFOMOD.GUI.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="350"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
         x:Class="Glow.PrettyFOMOD.GUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        RequestedThemeVariant="Light"
+        RequestedThemeVariant="Dark"
         Icon="/Assets/flower.ico"
-        Background="MistyRose"
+        Background="Transparent"
+        TransparencyLevelHint="AcrylicBlur"
+        ExtendClientAreaToDecorationsHint="True"
         Title="PrettyFOMOD">
 
     <Design.DataContext>
@@ -18,8 +20,54 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <v:FolderSelectView DataContext="{Binding FolderSelectViewModel}" />
-    </StackPanel>
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0.65" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding SelectedFolder, Converter={x:Static ObjectConverters.IsNull}}">
+            <TextBlock FontSize="18" Text="{Binding Greeting}" HorizontalAlignment="Center" />
+            <Button Click="Button_OnClick" HorizontalAlignment="Center" Margin="0, 20, 0, 0">Select Mod Folder</Button>
+            <TextBlock Text="{Binding SelectedFolder}" />
+        </StackPanel>
+        <Grid
+            ShowGridLines="True"
+            ColumnDefinitions="1*,3*"
+            RowDefinitions="*"
+            IsVisible="{Binding SelectedFolder, Converter={x:Static ObjectConverters.IsNotNull}}"
+        >
+            <StackPanel Margin="10" Grid.Column="0">
+                    
+                <TextBlock Margin="0 5">Mod Name:</TextBlock>
+                <TextBox  Text="{Binding Name}" Watermark="Mod Name" />
+                
+                <TextBlock Margin="0 5">Author:</TextBlock>
+                <TextBox Text="{Binding Author}" Watermark="Author" />
+                
+                <TextBlock Margin="0 5">Version:</TextBlock>
+                <TextBox Text="{Binding Version}" Watermark="Version" />
+                
+                <TextBlock Margin="0 5">Website:</TextBlock>
+                <TextBox Text="{Binding Website}" Watermark="Website"/>
+                
+                <TextBlock Margin="0 5">Description:</TextBlock>
+                <TextBox
+                    Height="100"
+                    xml:space="preserve"
+                    Watermark="Description"
+                    Text="{Binding Description}"
+                    TextWrapping="Wrap"
+                />
+            </StackPanel>
+                
+            <!-- </Panel> -->
+        </Grid>
+    </Panel>
 
 </Window>
