@@ -1,9 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Glow.PrettyFOMOD.GUI.ViewModels"
-        xmlns:v="using:Glow.PrettyFOMOD.GUI.Views"
+        xmlns:m="using:Glow.PrettyFOMOD.GUI.Models"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:prettyFomod="clr-namespace:Glow.PrettyFOMOD;assembly=Glow.PrettyFOMOD"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
         x:Class="Glow.PrettyFOMOD.GUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -11,9 +12,11 @@
         Icon="/Assets/flower.ico"
         Background="Transparent"
         TransparencyLevelHint="AcrylicBlur"
-        ExtendClientAreaToDecorationsHint="True"
         Title="PrettyFOMOD">
 
+    <Window.Resources>
+        <m:PluginFilesConverter x:Key="PluginFilesConverter"></m:PluginFilesConverter>
+    </Window.Resources>
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -65,6 +68,64 @@
                     TextWrapping="Wrap"
                 />
             </StackPanel>
+            <Panel Grid.Column="1">
+                <TreeView ItemsSource="{Binding InstallSteps}" Name="FomodTreeView">
+                    <TreeView.ItemContainerTheme>
+                        <ControlTheme TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                            <Setter Property="IsExpanded" Value="True"></Setter>
+                        </ControlTheme>
+                    </TreeView.ItemContainerTheme>
+                    <TreeView.DataTemplates>
+                        <TreeDataTemplate DataType="prettyFomod:InstallStep" ItemsSource="{Binding OptionalFileGroups.Group}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}"></TextBlock>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate DataType="prettyFomod:GroupList" ItemsSource="{Binding Group.Items}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Group}"></TextBlock>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate DataType="prettyFomod:Group" ItemsSource="{Binding Plugins.Plugin}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}"></TextBlock>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate DataType="prettyFomod:PluginList" ItemsSource="{Binding Plugin.Items}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Plugin}"></TextBlock>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate DataType="prettyFomod:Plugin" ItemsSource="{Binding Files}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}"></TextBlock>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate DataType="prettyFomod:FileList" ItemsSource="{Binding File}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontWeight="Bold" Text="Plugins"></TextBlock>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate DataType="prettyFomod:FileList" ItemsSource="{Binding Folder}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontWeight="Bold" Text="Folders"></TextBlock>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                        <DataTemplate DataType="prettyFomod:FileSystemItem">
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel>
+                                    <TextBlock Margin="0 5" Text="Source" FontWeight="Bold" />
+                                    <TextBlock Margin="0 5" Text="Destination" FontWeight="Bold" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="0 5">
+                                    <TextBlock Margin="0 5" Text="{Binding Source}"></TextBlock>
+                                    <TextBlock Margin="0 5" Text="{Binding Destination}"></TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </TreeView.DataTemplates>
+                </TreeView>
+            </Panel>
                 
             <!-- </Panel> -->
         </Grid>

@@ -11,7 +11,6 @@ public class FOMOD
     /*
      * Internal representation of FOMOD -- serialized to and from XML.
      */
-    private ModuleConfiguration _fomod = null!;
     private string _modFolder = null!;
 
     private bool _existedPriorToInit = false;
@@ -19,6 +18,7 @@ public class FOMOD
     private EspFile[] _espFiles = null!;
 
     public FomodInfo Info { get; set; }
+    public ModuleConfiguration ModuleConfiguration { get; set; }
     
     /*
      * Initialize with a directory path
@@ -29,7 +29,7 @@ public class FOMOD
         _modFolder = "";
         _fomodFolder = "";
         Info = new FomodInfo();
-        _fomod = new ModuleConfiguration();
+        ModuleConfiguration = new ModuleConfiguration();
     }
     public FOMOD(string modFolder)
     {
@@ -44,7 +44,7 @@ public class FOMOD
         // Otherwise create skeleton configuration into _fomod.
         _fomodFolder = InitializeDirectoryIfNotExists();
         Info = InitializeFomodInfoFile();
-        _fomod = InitializeFomodModuleConfigurationFile();
+        ModuleConfiguration = InitializeFomodModuleConfigurationFile();
         
         // Scan for ESPs in every folder except 'fomod' of course.
         _espFiles = ScanForEspFiles();

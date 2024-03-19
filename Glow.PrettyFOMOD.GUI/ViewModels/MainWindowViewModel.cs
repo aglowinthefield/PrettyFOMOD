@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Glow.PrettyFOMOD.Library;
@@ -32,6 +33,14 @@ public class MainWindowViewModel : ViewModelBase
 
     #endregion
 
+    #region Module
+
+    private ModuleConfiguration? _moduleConfiguration;
+    private Collection<InstallStep>? _installSteps;
+    
+
+    #endregion
+
     private FOMOD _fomod = new();
 
     public string? SelectedFolder
@@ -50,6 +59,11 @@ public class MainWindowViewModel : ViewModelBase
             Description = Fomod.Info.Description;
             Version     = Fomod.Info.Version;
             Website     = Fomod.Info.Website;
+            
+            // Set module
+            ModuleConfiguration = Fomod.ModuleConfiguration;
+            InstallSteps = Fomod.ModuleConfiguration.InstallSteps.InstallStep;
+            
         }
     }
 
@@ -91,5 +105,17 @@ public class MainWindowViewModel : ViewModelBase
     {
         get => _description;
         set => this.RaiseAndSetIfChanged(ref _description, value);
+    }
+
+    public ModuleConfiguration? ModuleConfiguration
+    {
+        get => _moduleConfiguration;
+        set => this.RaiseAndSetIfChanged(ref _moduleConfiguration, value);
+    }
+
+    public Collection<InstallStep>? InstallSteps
+    {
+        get => _installSteps;
+        set => this.RaiseAndSetIfChanged(ref _installSteps, value);
     }
 }
